@@ -67,7 +67,7 @@ export default function RegisterPage() {
       let errorMessage = 'حدث خطأ في التسجيل';
 
       if (err.code === 'ERR_NETWORK') {
-        errorMessage = 'خطأ في الاتصال بالخادم. تأكد أن الباك إند يعمل وإعداد CORS صحيح';
+        errorMessage = 'خطأ في الاتصال بالخادم ';
       } else if (err.response) {
         const data = err.response.data;
         if (data?.message) {
@@ -133,7 +133,7 @@ export default function RegisterPage() {
 
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">الاسم الكامل</label>
-              <input type="text" name="fullName" value={form.fullName} onChange={handleChange} placeholder="د. أحمد الشريف" className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required />
+              <input type="text" name="fullName" value={form.fullName} onChange={handleChange} placeholder="" className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required />
             </div>
 
             <div>
