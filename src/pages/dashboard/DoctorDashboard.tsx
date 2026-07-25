@@ -155,7 +155,7 @@ export default function DoctorDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-dark-900">مرحباً، {user?.fullName || profile?.fullName}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-dark-900">مرحباً، {user?.fullName || profile?.fullName}</h1>
             <p className="text-slate-500">لوحة تحكم الطبيب - منصة أديم</p>
             {profile && (
               <div className="mt-2 flex items-center gap-2">
@@ -170,14 +170,14 @@ export default function DoctorDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setActiveTab('appointments')} className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'appointments' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
+        <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap pb-1 -mx-4 px-4 md:mx-0 md:px-0">
+          <button onClick={() => setActiveTab('appointments')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'appointments' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
             المواعيد
           </button>
-          <button onClick={() => setActiveTab('schedule')} className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'schedule' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
+          <button onClick={() => setActiveTab('schedule')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'schedule' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
             جدول العمل
           </button>
-          <button onClick={() => setActiveTab('profile')} className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'profile' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
+          <button onClick={() => setActiveTab('profile')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'profile' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
             الملف التعريفي
           </button>
         </div>
@@ -300,8 +300,8 @@ export default function DoctorDashboard() {
               ) : (
                 <div className="space-y-2">
                   {availability.map(a => (
-                    <div key={a.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100">
-                      <div className="flex items-center gap-3">
+                    <div key={a.id} className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border border-slate-100">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                         <span className="font-bold text-sm">{DAY_LABELS[a.dayOfWeek]}</span>
                         <span className="text-sm text-slate-500" dir="ltr">{a.startTime.slice(0, 5)} - {a.endTime.slice(0, 5)}</span>
                       </div>

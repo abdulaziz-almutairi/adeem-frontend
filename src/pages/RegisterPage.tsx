@@ -85,8 +85,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen pt-20 flex items-center justify-center adeem-bg px-4 py-12">
-      <div className="relative z-10 bg-white p-8 rounded-3xl shadow-2xl max-w-lg w-full border border-slate-100">
+    <div className="min-h-screen pt-16 sm:pt-20 flex items-center justify-center adeem-bg px-4 py-6 sm:py-12">
+      <div className="relative z-10 bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-lg w-full border border-slate-100">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-dark-900">إنشاء حساب جديد</h2>
           <p className="text-slate-500 text-sm mt-1">انضم لمنصة أديم الطبية</p>
@@ -116,14 +116,14 @@ export default function RegisterPage() {
               <div className="grid grid-cols-2 gap-3">
                 <label className="cursor-pointer">
                   <input type="radio" name="role" value="PATIENT" checked={form.role === 'PATIENT'} onChange={handleChange} className="hidden peer" />
-                  <div className="p-3 rounded-xl border-2 border-slate-200 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50">
+                  <div className="h-full p-3 rounded-xl border-2 border-slate-200 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50 flex flex-col items-center justify-center">
                     <i className="fas fa-user text-lg text-slate-400 peer-checked:text-brand-600 mb-1 block"></i>
                     <span className="text-sm font-bold">مريض</span>
                   </div>
                 </label>
                 <label className="cursor-pointer">
                   <input type="radio" name="role" value="DOCTOR" checked={form.role === 'DOCTOR'} onChange={handleChange} className="hidden peer" />
-                  <div className="p-3 rounded-xl border-2 border-slate-200 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50">
+                  <div className="h-full p-3 rounded-xl border-2 border-slate-200 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50 flex flex-col items-center justify-center">
                     <i className="fas fa-user-md text-lg text-slate-400 peer-checked:text-brand-600 mb-1 block"></i>
                     <span className="text-sm font-bold">طبيب جلدية</span>
                   </div>

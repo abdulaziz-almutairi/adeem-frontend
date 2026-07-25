@@ -11,7 +11,7 @@ export default function HomePage() {
             <i className="fas fa-circle-nodes"></i> منصة أديم الطبية المتكاملة
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-black leading-tight mb-6 text-dark-900">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-tight mb-6 text-dark-900">
             استشارة جلدية آمنة <br/>
             <div className='justify-center pt-3'>
                 <span className="bg-clip-text text-transparent bg-brand-gradient">أونلاين</span>
@@ -57,7 +57,7 @@ export default function HomePage() {
       <section className="py-20 bg-slate-50">
         <div className="max-w-6xl mx-auto px-6">
           <h2 className="text-3xl font-black text-dark-900 mb-12 text-center">لماذا أديم للجلدية؟</h2>
-          <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex justify-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: Shield, title: 'خصوصية تامة', desc: 'استشارة سرية 100% من منزلك' },
               { icon: Clock, title: 'متاح 24/7', desc: 'أطباء جلدية متاحون على مدار الساعة' },

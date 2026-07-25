@@ -13,6 +13,8 @@ import PaymentPage from './pages/payment/PaymentPage';
 import VideoCallPage from './pages/video/VideoCallPage';
 import DoctorDashboard from './pages/dashboard/DoctorDashboard';
 import PatientDashboard from './pages/dashboard/PatientDashboard';
+import AdminDashboard from './pages/dashboard/AdminDashboard';
+import { dashboardPathForRole } from './utils/roles';
 import { Loader2 } from 'lucide-react';
 
 const ProtectedRoute = ({ children, role }: { children: React.ReactNode; role?: string }) => {
@@ -41,7 +43,7 @@ function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route
           path="/login"
-          element={user ? <Navigate to={user.role === 'DOCTOR' ? '/doctor/dashboard' : '/patient/dashboard'} /> : <LoginPage />}
+          element={user ? <Navigate to={dashboardPathForRole(user.role)} /> : <LoginPage />}
         />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/booking" element={<ProtectedRoute role="PATIENT"><BookingPage /></ProtectedRoute>} />
@@ -51,6 +53,7 @@ function AppRoutes() {
         <Route path="/video-call/:id" element={<ProtectedRoute><VideoCallPage /></ProtectedRoute>} />
         <Route path="/doctor/dashboard" element={<ProtectedRoute role="DOCTOR"><DoctorDashboard /></ProtectedRoute>} />
         <Route path="/patient/dashboard" element={<ProtectedRoute role="PATIENT"><PatientDashboard /></ProtectedRoute>} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute role="ADMIN"><AdminDashboard /></ProtectedRoute>} />
       </Routes>
     </>
   );

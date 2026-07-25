@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Loader2 } from 'lucide-react';
+import { dashboardPathForRole } from '../utils/roles';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -19,11 +20,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
       const savedUser = JSON.parse(localStorage.getItem('adeem_user') || '{}');
-      if (savedUser.role === 'DOCTOR') {
-        navigate('/doctor/dashboard');
-      } else {
-        navigate('/patient/dashboard');
-      }
+      navigate(dashboardPathForRole(savedUser.role));
     } catch (err: any) {
       const message = err.response?.data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
       setError(message);
@@ -33,8 +30,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen pt-20 flex items-center justify-center adeem-bg px-4">
-      <div className="relative z-10 bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100">
+    <div className="min-h-screen pt-16 sm:pt-20 flex items-center justify-center adeem-bg px-4">
+      <div className="relative z-10 bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100">
         <div className="text-center mb-6">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-brand-gradient flex items-center justify-center mb-4 shadow-md">
             <i className="fas fa-circle-nodes text-white text-xl"></i>

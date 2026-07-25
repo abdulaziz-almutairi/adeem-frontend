@@ -67,7 +67,7 @@ export default function PaymentPage() {
             {payment && (
               <div className="bg-slate-50 rounded-xl p-4 mb-6 text-right space-y-2">
                 <div className="flex justify-between text-sm"><span className="text-slate-500">المبلغ</span><span className="font-bold">{payment.amount} ر.س</span></div>
-                <div className="flex justify-between text-sm"><span className="text-slate-500">المرجع</span><span className="font-mono text-xs" dir="ltr">{payment.transactionReference}</span></div>
+                <div className="flex justify-between gap-3 text-sm"><span className="text-slate-500 shrink-0">المرجع</span><span className="font-mono text-xs break-all" dir="ltr">{payment.transactionReference}</span></div>
               </div>
             )}
 

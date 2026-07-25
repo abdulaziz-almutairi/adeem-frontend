@@ -41,7 +41,7 @@ export default function AppointmentCard({
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex flex-wrap items-center gap-2 mb-1">
           <span className={`text-xs px-3 py-1 rounded-full font-bold ${STATUS_STYLE[appointment.status]}`}>
             {STATUS_LABEL[appointment.status]}
           </span>

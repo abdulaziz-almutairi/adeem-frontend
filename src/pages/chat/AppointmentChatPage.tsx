@@ -179,7 +179,7 @@ export default function AppointmentChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="اكتب رسالتك هنا..."
-              className="input-field flex-1 px-4 py-3 rounded-full border-2 border-slate-200 text-sm"
+              className="input-field flex-1 min-w-0 px-4 py-3 rounded-full border-2 border-slate-200 text-sm"
               disabled={sending}
             />
             <button

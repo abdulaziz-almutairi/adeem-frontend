@@ -92,7 +92,7 @@ export default function BookingPage() {
     <div className="min-h-screen pt-24 pb-12 px-6 adeem-bg">
       <div className="relative z-10 max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-dark-900">حجز استشارة جلدية أونلاين</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-dark-900">حجز استشارة جلدية أونلاين</h1>
           <p className="text-slate-500 mt-2">اختر طبيب الجلدية، ثم الموعد المناسب لك</p>
         </div>
 
@@ -104,7 +104,7 @@ export default function BookingPage() {
 
         <div className="bg-white rounded-2xl p-6 shadow-xl border border-slate-100 mb-6">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 rounded-full bg-brand-gradient text-white flex items-center justify-center text-sm">1</span>
+            <span className="w-8 h-8 shrink-0 rounded-full bg-brand-gradient text-white flex items-center justify-center text-sm">1</span>
             اختر طبيب الجلدية
           </h2>
           {doctors.length === 0 && !error ? (
@@ -132,7 +132,7 @@ export default function BookingPage() {
         {selectedDoctor && (
           <div className="bg-white rounded-2xl p-6 shadow-xl border border-slate-100 mb-6">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 rounded-full bg-brand-gradient text-white flex items-center justify-center text-sm">2</span>
+              <span className="w-8 h-8 shrink-0 rounded-full bg-brand-gradient text-white flex items-center justify-center text-sm">2</span>
               اختر التاريخ ونوع الاستشارة
             </h2>
 
@@ -150,7 +150,7 @@ export default function BookingPage() {
               </div>
               <div className="flex-1">
                 <label className="block text-sm font-bold text-slate-700 mb-2">نوع الاستشارة</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setConsultationType('CALL')}

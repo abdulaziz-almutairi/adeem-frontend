@@ -6,3 +6,4 @@ export { availabilityApi } from './availabilityApi';
 export { messageApi } from './messageApi';
 export { paymentApi } from './paymentApi';
 export { chatApi } from './chatApi';
+export { adminApi } from './adminApi';

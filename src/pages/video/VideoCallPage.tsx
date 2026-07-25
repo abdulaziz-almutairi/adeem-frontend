@@ -55,8 +55,8 @@ export default function VideoCallPage() {
   const counterpartName = appointment ? (user?.role === 'DOCTOR' ? appointment.patientName : appointment.doctorName) : '';
 
   return (
-    <div className="h-screen bg-dark-900 flex flex-col items-center justify-center text-white px-6">
-      <button onClick={() => navigate(-1)} className="absolute top-6 right-6 p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2 text-sm text-slate-300">
+    <div className="h-screen bg-dark-900 flex flex-col items-center justify-center text-white px-6 pt-16">
+      <button onClick={() => navigate(-1)} className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-2 text-sm text-slate-300">
         <ArrowRight size={18} /> رجوع
       </button>
 

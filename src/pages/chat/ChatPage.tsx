@@ -1,15 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bot, Send, Loader2, User, ImagePlus, X, AlertCircle } from 'lucide-react';
 import { chatApi } from '../../api/chatApi';
+import { useAuth } from '../../context/AuthContext';
 import { ChatMessage } from '../../types';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB - نفس الحد الأقصى بالباك إند
 
+function storageKey(userId: number) {
+  return `adeem_ai_conversation_id_${userId}`;
+}
+
 export default function ChatPage() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [error, setError] = useState('');
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -20,6 +27,43 @@ export default function ChatPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, sending]);
+
+  // استرجاع آخر محادثة محفوظة لهذا المستخدم عند فتح الصفحة
+  useEffect(() => {
+    if (!user) {
+      setLoadingHistory(false);
+      return;
+    }
+
+    const savedId = localStorage.getItem(storageKey(user.id));
+    if (!savedId) {
+      setLoadingHistory(false);
+      return;
+    }
+
+    const id = Number(savedId);
+    chatApi.getHistory(id)
+      .then((history) => {
+        setConversationId(id);
+        setMessages(history.map((m, idx) => ({
+          id: `h-${idx}-${m.createdAt}`,
+          sender: m.senderType === 'USER' ? 'user' : 'ai',
+          text: m.content,
+          timestamp: new Date(m.createdAt),
+        })));
+      })
+      .catch(() => {
+        // المحادثة القديمة لم تعد متاحة (محذوفة/غير مصرح بها) - نبدأ محادثة جديدة
+        localStorage.removeItem(storageKey(user.id));
+      })
+      .finally(() => setLoadingHistory(false));
+  }, [user]);
+
+  useEffect(() => {
+    if (user && conversationId) {
+      localStorage.setItem(storageKey(user.id), String(conversationId));
+    }
+  }, [user, conversationId]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,7 +148,9 @@ export default function ChatPage() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.length === 0 && (
+            {loadingHistory ? (
+              <div className="h-full flex items-center justify-center"><Loader2 className="w-6 h-6 text-brand-600 animate-spin" /></div>
+            ) : messages.length === 0 && (
               <div className="h-full flex flex-col items-center justify-center text-center text-slate-400 gap-2">
                 <Bot size={32} />
                 <p className="text-sm max-w-xs">اكتب سؤالك عن أي عرض جلدي تعاني منه، أو أرفق صورة الحالة وسأساعدك بمعلومات عامة</p>
@@ -183,7 +229,7 @@ export default function ChatPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={selectedImage ? 'أضف وصفاً للصورة (اختياري)...' : 'اكتب رسالتك هنا...'}
-              className="input-field flex-1 px-4 py-3 rounded-xl border-2 border-slate-200 text-sm"
+              className="input-field flex-1 min-w-0 px-4 py-3 rounded-xl border-2 border-slate-200 text-sm"
               disabled={sending}
             />
             <button
