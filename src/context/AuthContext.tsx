@@ -8,6 +8,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   registerPatient: (data: any) => Promise<void>;
   registerDoctor: (data: any) => Promise<void>;
+  updateUser: (patch: Partial<User>) => void;
   logout: () => void;
 }
 
@@ -69,8 +70,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const updateUser = (patch: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...patch };
+      localStorage.setItem('adeem_user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, registerPatient, registerDoctor, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, registerPatient, registerDoctor, updateUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

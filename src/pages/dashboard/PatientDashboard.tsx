@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogOut, CalendarCheck, Bot, Loader2, AlertCircle, CalendarX } from 'lucide-react';
+import { LogOut, CalendarCheck, Bot, Loader2, AlertCircle, CalendarX, Pencil } from 'lucide-react';
 import { appointmentApi } from '../../api/appointmentApi';
 import { Appointment } from '../../types';
 import AppointmentCard from '../../components/appointments/AppointmentCard';
+import EditProfileModal from '../../components/profile/EditProfileModal';
 
 export default function PatientDashboard() {
   const { user, logout } = useAuth();
@@ -14,6 +15,7 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
 
   const fetchAppointments = async () => {
     try {
@@ -52,13 +54,23 @@ export default function PatientDashboard() {
             <h1 className="text-2xl md:text-3xl font-bold text-dark-900">مرحباً، {user?.fullName}</h1>
             <p className="text-slate-500">لوحة تحكم المريض - منصة أديم</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50"
-          >
-            <LogOut size={18} /> تسجيل الخروج
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setEditingProfile(true)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50"
+            >
+              <Pencil size={16} /> تعديل البيانات
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50"
+            >
+              <LogOut size={18} /> تسجيل الخروج
+            </button>
+          </div>
         </div>
+
+        {editingProfile && <EditProfileModal onClose={() => setEditingProfile(false)} />}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Link

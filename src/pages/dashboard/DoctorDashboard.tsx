@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Loader2, AlertCircle, CalendarX, Plus, Trash2, CalendarDays } from 'lucide-react';
+import { LogOut, Loader2, AlertCircle, CalendarX, Plus, Trash2, CalendarDays, Pencil } from 'lucide-react';
 import { doctorApi } from '../../api/doctorApi';
 import { appointmentApi } from '../../api/appointmentApi';
 import { availabilityApi } from '../../api/availabilityApi';
 import { Appointment, Availability, DayOfWeek, DoctorProfile } from '../../types';
 import AppointmentCard from '../../components/appointments/AppointmentCard';
+import EditProfileModal from '../../components/profile/EditProfileModal';
 
 type StatusFilter = 'ALL' | Appointment['status'];
 
@@ -52,6 +53,7 @@ export default function DoctorDashboard() {
   const [newEnd, setNewEnd] = useState('17:00');
   const [addingAvailability, setAddingAvailability] = useState(false);
   const [availabilityError, setAvailabilityError] = useState('');
+  const [editingProfile, setEditingProfile] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -166,8 +168,20 @@ export default function DoctorDashboard() {
               </div>
             )}
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50"><LogOut size={18} /> تسجيل الخروج</button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setEditingProfile(true)} className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50">
+              <Pencil size={16} /> تعديل البيانات
+            </button>
+            <button onClick={handleLogout} className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50"><LogOut size={18} /> تسجيل الخروج</button>
+          </div>
         </div>
+
+        {editingProfile && (
+          <EditProfileModal
+            onClose={() => setEditingProfile(false)}
+            onSaved={(patch) => setProfile(prev => prev ? { ...prev, ...patch } : prev)}
+          />
+        )}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap pb-1 -mx-4 px-4 md:mx-0 md:px-0">
@@ -319,10 +333,19 @@ export default function DoctorDashboard() {
         {/* Profile */}
         {activeTab === 'profile' && profile && (
           <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-            <h2 className="text-xl font-bold mb-6">بياناتي</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">بياناتي</h2>
+              <button
+                onClick={() => setEditingProfile(true)}
+                className="flex items-center gap-2 px-4 py-2 text-sm bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50"
+              >
+                <Pencil size={14} /> تعديل
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className="block text-sm font-bold text-slate-500 mb-1">الاسم</label><p className="font-semibold">{profile.fullName}</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">البريد</label><p className="font-semibold" dir="ltr">{profile.email}</p></div>
+              <div><label className="block text-sm font-bold text-slate-500 mb-1">رقم الهاتف</label><p className="font-semibold" dir="ltr">{profile.phoneNumber || '—'}</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">التخصص</label><p className="font-semibold">{profile.specialty}</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">سعر الجلسة</label><p className="font-semibold">{profile.pricePerSession} ر.س</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">حالة التوثيق</label>

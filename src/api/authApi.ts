@@ -35,6 +35,11 @@ export const authApi = {
     return response.data;
   },
 
+  updateProfile: async (data: { fullName?: string; phoneNumber?: string }) => {
+    const response = await api.put('/users/me', data);
+    return response.data;
+  },
+
   getDoctorMe: async () => {
     const response = await api.get('/doctors/me');
     return response.data;

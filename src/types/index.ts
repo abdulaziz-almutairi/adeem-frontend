@@ -84,6 +84,12 @@ export interface ChatMessage {
   imageUrl?: string;
 }
 
+export interface ChatConversationSummary {
+  id: number;
+  title: string;
+  updatedAt: string;
+}
+
 export interface APIResponse<T = any> {
   message?: string;
   data?: T;
