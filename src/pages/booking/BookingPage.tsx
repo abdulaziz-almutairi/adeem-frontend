@@ -185,7 +185,7 @@ export default function BookingPage() {
                     key={slot}
                     type="button"
                     onClick={() => setSelectedSlot(slot)}
-                    className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${selectedSlot === slot ? 'border-brand-500 bg-brand-500 text-white' : 'border-slate-200 text-slate-600 hover:border-brand-300'}`}
+                    className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${selectedSlot === slot ? 'border-brand-500 bg-brand-gradient text-white' : 'border-slate-200 text-slate-600 hover:border-brand-300'}`}
                     dir="ltr"
                   >
                     {formatTime(slot)}
