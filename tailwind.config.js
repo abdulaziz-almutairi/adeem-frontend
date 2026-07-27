@@ -12,7 +12,7 @@ export default {
         dark: { 800:'#1e293b',900:'#0f172a' },
       },
       backgroundImage: {
-        'brand-gradient': 'linear-gradient(135deg, #4b2481 0%, #6837a4 66%, #8650a8 66%, #80263e 66%)',
+        'brand-gradient': 'linear-gradient(135deg, #4b2481 0%, #6837a4 33%, #8650a8 66%, #80263e 100%)',
       },
       fontFamily: {
         cairo: ['Cairo', 'sans-serif'],
