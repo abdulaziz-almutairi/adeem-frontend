@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogOut, CalendarCheck, Bot, Loader2, AlertCircle, CalendarX, Pencil } from 'lucide-react';
+import { LogOut, CalendarCheck, Bot, Loader2, CalendarX, Pencil } from 'lucide-react';
 import { appointmentApi } from '../../api/appointmentApi';
 import { Appointment } from '../../types';
 import AppointmentCard from '../../components/appointments/AppointmentCard';
 import EditProfileModal from '../../components/profile/EditProfileModal';
+import Button from '../../components/ui/Button';
+import Alert from '../../components/ui/Alert';
 
 export default function PatientDashboard() {
   const { user, logout } = useAuth();
@@ -55,18 +57,12 @@ export default function PatientDashboard() {
             <p className="text-slate-500">لوحة تحكم المريض - منصة أديم</p>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setEditingProfile(true)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50"
-            >
+            <Button variant="secondary" onClick={() => setEditingProfile(true)}>
               <Pencil size={16} /> تعديل البيانات
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50"
-            >
+            </Button>
+            <Button variant="outline-danger" onClick={handleLogout}>
               <LogOut size={18} /> تسجيل الخروج
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -75,7 +71,7 @@ export default function PatientDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Link
             to="/booking"
-            className="bg-brand-gradient rounded-2xl p-6 text-white shadow-lg flex items-center gap-4 hover:shadow-xl transition-shadow"
+            className="bg-brand-600 rounded-2xl p-6 text-white shadow-lg flex items-center gap-4 hover:bg-brand-700 hover:shadow-xl hover:-translate-y-0.5 transition-all"
           >
             <CalendarCheck size={28} />
             <div>
@@ -85,7 +81,7 @@ export default function PatientDashboard() {
           </Link>
           <Link
             to="/ai-chat"
-            className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex items-center gap-4 hover:shadow-lg transition-shadow"
+            className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 hover:border-brand-100 transition-all"
           >
             <div className="p-3 rounded-xl bg-brand-50 text-brand-600"><Bot size={22} /></div>
             <div>
@@ -100,9 +96,7 @@ export default function PatientDashboard() {
         {loading ? (
           <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 text-brand-600 animate-spin" /></div>
         ) : error ? (
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold flex items-center gap-2">
-            <AlertCircle size={18} /> {error}
-          </div>
+          <Alert variant="danger">{error}</Alert>
         ) : appointments.length === 0 ? (
           <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm text-center">
             <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-50 flex items-center justify-center mb-4">

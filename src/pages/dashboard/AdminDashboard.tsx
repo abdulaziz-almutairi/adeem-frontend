@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Loader2, AlertCircle, ShieldCheck, ShieldX, UserX, Users, Stethoscope } from 'lucide-react';
+import { LogOut, Loader2, ShieldCheck, ShieldX, UserX, Users, Stethoscope } from 'lucide-react';
 import { adminApi } from '../../api/adminApi';
 import { DoctorProfile, User } from '../../types';
+import Button from '../../components/ui/Button';
+import Alert from '../../components/ui/Alert';
+import Badge, { type BadgeVariant } from '../../components/ui/Badge';
 
 type RoleFilter = 'ALL' | User['role'];
 
@@ -16,10 +19,10 @@ const ROLE_FILTER_LABELS: Record<RoleFilter, string> = {
 
 const ROLE_FILTERS: RoleFilter[] = ['ALL', 'PATIENT', 'DOCTOR', 'ADMIN'];
 
-const ROLE_BADGE_STYLE: Record<User['role'], string> = {
-  PATIENT: 'bg-brand-50 text-brand-700',
-  DOCTOR: 'bg-emerald-100 text-emerald-700',
-  ADMIN: 'bg-amber-100 text-amber-700',
+const ROLE_BADGE_VARIANT: Record<User['role'], BadgeVariant> = {
+  PATIENT: 'brand',
+  DOCTOR: 'success',
+  ADMIN: 'warning',
 };
 
 const ROLE_LABEL: Record<User['role'], string> = {
@@ -129,25 +132,25 @@ export default function AdminDashboard() {
             <h1 className="text-2xl md:text-3xl font-bold text-dark-900">مرحباً، {user?.fullName}</h1>
             <p className="text-slate-500">لوحة تحكم المشرف - منصة أديم</p>
           </div>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50"><LogOut size={18} /> تسجيل الخروج</button>
+          <Button variant="outline-danger" onClick={handleLogout}><LogOut size={18} /> تسجيل الخروج</Button>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap pb-1 -mx-4 px-4 md:mx-0 md:px-0">
           <button
             onClick={() => setActiveTab('doctors')}
-            className={`shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'doctors' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
+            className={`shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'doctors' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
           >
             <Stethoscope size={16} /> طلبات توثيق الأطباء
             {pendingDoctors.length > 0 && (
-              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${activeTab === 'doctors' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'}`}>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${activeTab === 'doctors' ? 'bg-white/20 text-white' : 'bg-warning-100 text-warning-700'}`}>
                 {pendingDoctors.length}
               </span>
             )}
           </button>
           <button
             onClick={() => setActiveTab('users')}
-            className={`shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'users' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
+            className={`shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'users' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
           >
             <Users size={16} /> المستخدمون
           </button>
@@ -158,9 +161,7 @@ export default function AdminDashboard() {
           doctorsLoading ? (
             <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 text-brand-600 animate-spin" /></div>
           ) : doctorsError ? (
-            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold flex items-center gap-2">
-              <AlertCircle size={18} /> {doctorsError}
-            </div>
+            <Alert variant="danger">{doctorsError}</Alert>
           ) : pendingDoctors.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center text-slate-400">
               <ShieldCheck className="mx-auto mb-2" size={32} />
@@ -173,7 +174,7 @@ export default function AdminDashboard() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
                       <h3 className="font-bold text-dark-900">{doc.fullName}</h3>
-                      <span className="text-xs px-3 py-1 rounded-full font-bold bg-amber-100 text-amber-700">بانتظار التوثيق</span>
+                      <Badge variant="warning">بانتظار التوثيق</Badge>
                     </div>
                     <p className="text-sm text-brand-600 font-semibold">{doc.specialty}</p>
                     <p className="text-sm text-slate-500 break-all" dir="ltr">{doc.email} · {doc.phoneNumber}</p>
@@ -183,20 +184,20 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    <button
+                    <Button
+                      variant="solid-success"
                       onClick={() => handleVerification(doc.id, 'VERIFIED')}
-                      disabled={decidingId === doc.id}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white font-bold text-sm rounded-xl hover:bg-emerald-600 transition-all disabled:opacity-50"
+                      loading={decidingId === doc.id}
                     >
-                      {decidingId === doc.id ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />} قبول
-                    </button>
-                    <button
+                      {decidingId !== doc.id && <ShieldCheck size={16} />} قبول
+                    </Button>
+                    <Button
+                      variant="outline-danger"
                       onClick={() => handleVerification(doc.id, 'REJECTED')}
                       disabled={decidingId === doc.id}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold text-sm rounded-xl hover:bg-red-50 transition-all disabled:opacity-50"
                     >
                       <ShieldX size={16} /> رفض
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -212,7 +213,7 @@ export default function AdminDashboard() {
                 <button
                   key={f}
                   onClick={() => setRoleFilter(f)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${roleFilter === f ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${roleFilter === f ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
                 >
                   {ROLE_FILTER_LABELS[f]} ({roleCounts[f]})
                 </button>
@@ -222,9 +223,7 @@ export default function AdminDashboard() {
             {usersLoading ? (
               <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 text-brand-600 animate-spin" /></div>
             ) : usersError ? (
-              <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold flex items-center gap-2">
-                <AlertCircle size={18} /> {usersError}
-              </div>
+              <Alert variant="danger">{usersError}</Alert>
             ) : filteredUsers.length === 0 ? (
               <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center text-slate-400">
                 <Users className="mx-auto mb-2" size={32} />
@@ -237,20 +236,21 @@ export default function AdminDashboard() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <h3 className="font-bold text-dark-900 truncate">{u.fullName}</h3>
-                        <span className={`text-xs px-3 py-1 rounded-full font-bold shrink-0 ${ROLE_BADGE_STYLE[u.role]}`}>{ROLE_LABEL[u.role]}</span>
+                        <Badge variant={ROLE_BADGE_VARIANT[u.role]} className="shrink-0">{ROLE_LABEL[u.role]}</Badge>
                       </div>
                       <p className="text-sm text-slate-500 break-all" dir="ltr">{u.email}{u.phoneNumber ? ` · ${u.phoneNumber}` : ''}</p>
                       <p className="text-xs text-slate-400">انضم في {formatDate(u.createdAt)}</p>
                     </div>
 
                     {u.id !== user?.id ? (
-                      <button
+                      <Button
+                        variant="outline-danger"
                         onClick={() => handleDeleteUser(u)}
-                        disabled={deletingId === u.id}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-white border-2 border-red-200 text-red-600 font-bold text-sm rounded-xl hover:bg-red-50 transition-all disabled:opacity-50 shrink-0"
+                        loading={deletingId === u.id}
+                        className="shrink-0"
                       >
-                        {deletingId === u.id ? <Loader2 size={16} className="animate-spin" /> : <UserX size={16} />} حذف
-                      </button>
+                        {deletingId !== u.id && <UserX size={16} />} حذف
+                      </Button>
                     ) : (
                       <span className="text-xs text-slate-400 shrink-0">هذا حسابك</span>
                     )}

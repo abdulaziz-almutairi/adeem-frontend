@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, Loader2 } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 import { dashboardPathForRole } from '../utils/roles';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -33,18 +35,14 @@ export default function LoginPage() {
     <div className="min-h-screen pt-16 sm:pt-20 flex items-center justify-center adeem-bg px-4">
       <div className="relative z-10 bg-white p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full border border-slate-100">
         <div className="text-center mb-6">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-brand-gradient flex items-center justify-center mb-4 shadow-md">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-brand-600 flex items-center justify-center mb-4 shadow-md">
             <i className="fas fa-circle-nodes text-white text-xl"></i>
           </div>
           <h2 className="text-2xl font-bold text-dark-900">مرحباً بعودتك</h2>
           <p className="text-slate-500 text-sm mt-1">سجل دخولك للوصول لحسابك في أديم</p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold">
-            <i className="fas fa-exclamation-circle ml-1"></i> {error}
-          </div>
-        )}
+        {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -71,17 +69,9 @@ export default function LoginPage() {
               dir="ltr"
             />
           </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-brand-gradient text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <><Loader2 size={18} className="animate-spin" /> جاري تسجيل الدخول...</>
-            ) : (
-              <><LogIn size={18} /> تسجيل الدخول</>
-            )}
-          </button>
+          <Button type="submit" loading={loading} size="lg" className="w-full">
+            {!loading && <LogIn size={18} />} {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+          </Button>
         </form>
 
         <p className="text-center text-sm text-slate-500 mt-6">

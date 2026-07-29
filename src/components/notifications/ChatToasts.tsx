@@ -16,7 +16,7 @@ export default function ChatToasts() {
           onClick={() => { navigate(`/chat/${t.appointmentId}`); dismissToast(t.id); }}
           className="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 flex items-start gap-3 cursor-pointer hover:shadow-2xl transition-shadow animate-toast-in"
         >
-          <div className="w-9 h-9 rounded-full bg-brand-gradient text-white flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center flex-shrink-0">
             <MessageCircle size={16} />
           </div>
           <div className="min-w-0 flex-1">

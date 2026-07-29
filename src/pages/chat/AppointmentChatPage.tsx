@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowRight, Send, Loader2, AlertCircle, MessageCircle } from 'lucide-react';
+import { ArrowRight, Send, Loader2, MessageCircle } from 'lucide-react';
 import { messageApi } from '../../api/messageApi';
 import { appointmentApi } from '../../api/appointmentApi';
 import { useAuth } from '../../context/AuthContext';
 import { Appointment, Message } from '../../types';
 import type { Client } from '@stomp/stompjs';
+import Alert from '../../components/ui/Alert';
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
@@ -100,7 +101,7 @@ export default function AppointmentChatPage() {
       <div className="max-w-3xl mx-auto px-4 py-6 flex flex-col" style={{ height: 'calc(100vh - 5rem)' }}>
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm flex-1 flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="p-4 flex items-center gap-3 bg-brand-gradient text-white rounded-t-2xl">
+          <div className="p-4 flex items-center gap-3 bg-brand-600 text-white rounded-t-2xl">
             <button onClick={() => navigate(-1)} className="p-2 -m-2 rounded-lg hover:bg-white/10 transition-colors">
               <ArrowRight size={20} />
             </button>
@@ -110,7 +111,7 @@ export default function AppointmentChatPage() {
             <div className="min-w-0">
               <h3 className="font-bold truncate">{counterpartName}</h3>
               <span className="text-xs text-white/80 flex items-center gap-1.5">
-                <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-300' : 'bg-white/40'}`} />
+                <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-success-300' : 'bg-white/40'}`} />
                 {connected ? 'متصل الآن' : 'جاري الاتصال...'}
               </span>
             </div>
@@ -149,7 +150,7 @@ export default function AppointmentChatPage() {
                       <div
                         className={`max-w-[75%] px-4 py-2.5 text-sm shadow-sm ${
                           isMe
-                            ? `bg-brand-gradient text-white rounded-2xl ${prevSameSender ? 'rounded-tl-2xl' : 'rounded-tl-2xl'} rounded-br-md`
+                            ? `bg-brand-600 text-white rounded-2xl ${prevSameSender ? 'rounded-tl-2xl' : 'rounded-tl-2xl'} rounded-br-md`
                             : `bg-white text-slate-800 border border-slate-100 rounded-2xl rounded-bl-md`
                         }`}
                       >
@@ -166,11 +167,7 @@ export default function AppointmentChatPage() {
             <div ref={bottomRef} />
           </div>
 
-          {error && (
-            <div className="px-4 py-2 text-xs text-red-600 bg-red-50 border-t border-red-100 flex items-center gap-2">
-              <AlertCircle size={14} /> {error}
-            </div>
-          )}
+          {error && <Alert variant="danger" className="mx-4 mt-3 text-xs">{error}</Alert>}
 
           {/* Input */}
           <form onSubmit={handleSend} className="p-4 border-t border-slate-100 flex items-center gap-2 bg-white">
@@ -185,7 +182,7 @@ export default function AppointmentChatPage() {
             <button
               type="submit"
               disabled={sending || !input.trim()}
-              className="w-12 h-12 rounded-full bg-brand-gradient text-white flex items-center justify-center disabled:opacity-40 transition-all shadow-md hover:shadow-lg flex-shrink-0"
+              className="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center disabled:opacity-40 transition-all shadow-md hover:bg-brand-700 hover:shadow-lg flex-shrink-0"
             >
               {sending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
             </button>

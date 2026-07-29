@@ -73,7 +73,7 @@ export default function ChatSidebar({ conversations, activeId, open, onClose, on
         <div className="p-3 flex items-center gap-2">
           <button
             onClick={onNewChat}
-            className="flex-1 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-brand-gradient text-white font-bold text-sm shadow-sm hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all"
+            className="flex-1 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-brand-600 text-white font-bold text-sm shadow-sm hover:bg-brand-700 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all"
           >
             <span className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
               <MessageSquarePlus size={15} />
@@ -114,9 +114,9 @@ export default function ChatSidebar({ conversations, activeId, open, onClose, on
                         `}
                       >
                         {active && (
-                          <span className="absolute inset-y-1.5 start-0 w-1 rounded-full bg-brand-gradient" />
+                          <span className="absolute inset-y-1.5 start-0 w-1 rounded-full bg-brand-600" />
                         )}
-                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${active ? 'bg-brand-gradient text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                        <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${active ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
                           <MessageSquare size={14} />
                         </span>
                         <div className="flex-1 min-w-0">
@@ -125,7 +125,7 @@ export default function ChatSidebar({ conversations, activeId, open, onClose, on
                         </div>
                         <span
                           onClick={(e) => handleDelete(e, c.id)}
-                          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 active:scale-90 transition-all shrink-0"
+                          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 p-1.5 rounded-lg text-slate-400 hover:bg-danger-50 hover:text-danger-500 active:scale-90 transition-all shrink-0"
                           role="button"
                           aria-label="حذف المحادثة"
                         >

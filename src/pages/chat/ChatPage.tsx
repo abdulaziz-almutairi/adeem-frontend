@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bot, Send, Loader2, User, ImagePlus, X, AlertCircle, PanelLeftOpen } from 'lucide-react';
+import { Bot, Send, Loader2, User, ImagePlus, X, PanelLeftOpen } from 'lucide-react';
 import { chatApi } from '../../api/chatApi';
 import { useAuth } from '../../context/AuthContext';
 import { ChatConversationSummary, ChatMessage } from '../../types';
 import ChatSidebar from '../../components/chat/ChatSidebar';
+import Alert from '../../components/ui/Alert';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB - نفس الحد الأقصى بالباك إند
@@ -263,7 +264,7 @@ export default function ChatPage() {
 
           <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-brand-gradient text-white shadow-sm">
+            <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-brand-600 text-white shadow-sm">
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="md:hidden w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors shrink-0"
@@ -275,7 +276,7 @@ export default function ChatPage() {
                 <div className="w-11 h-11 rounded-full bg-white/20 ring-2 ring-white/30 flex items-center justify-center">
                   <Bot size={20} />
                 </div>
-                <span className="absolute -bottom-0.5 -end-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-brand-500" />
+                <span className="absolute -bottom-0.5 -end-0.5 w-3 h-3 rounded-full bg-success-400 ring-2 ring-brand-500" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-bold">وهج - المساعد الذكي</h3>
@@ -298,11 +299,11 @@ export default function ChatPage() {
 
               {messages.map(m => (
                 <div key={m.id} className={`flex items-end gap-2 animate-message-in ${m.sender === 'user' ? 'flex-row-reverse' : ''}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.sender === 'user' ? 'bg-brand-gradient text-white shadow-sm' : 'bg-white border border-slate-200 text-brand-600 shadow-sm'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${m.sender === 'user' ? 'bg-brand-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-brand-600 shadow-sm'}`}>
                     {m.sender === 'user' ? <User size={15} /> : <Bot size={15} />}
                   </div>
                   <div className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'} max-w-[75%]`}>
-                    <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${m.sender === 'user' ? 'bg-brand-gradient text-white' : 'bg-white border border-slate-100 text-slate-800'}`}>
+                    <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${m.sender === 'user' ? 'bg-brand-600 text-white' : 'bg-white border border-slate-100 text-slate-800'}`}>
                       {m.imageUrl && (
                         <img src={m.imageUrl} alt="صورة مرفقة" className="rounded-xl mb-2 max-h-56 w-full object-cover" />
                       )}
@@ -328,11 +329,7 @@ export default function ChatPage() {
               <div ref={bottomRef} />
             </div>
 
-            {error && (
-              <div className="px-4 py-2 text-xs text-red-600 bg-red-50 border-t border-red-100 flex items-center gap-2">
-                <AlertCircle size={14} /> {error}
-              </div>
-            )}
+            {error && <Alert variant="danger" className="mx-4 mt-3 text-xs">{error}</Alert>}
 
             {imagePreview && (
               <div className="px-4 pt-3">
@@ -341,7 +338,7 @@ export default function ChatPage() {
                   <button
                     type="button"
                     onClick={removeSelectedImage}
-                    className="absolute -top-2 -end-2 w-6 h-6 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                    className="absolute -top-2 -end-2 w-6 h-6 rounded-full bg-danger-500 text-white flex items-center justify-center shadow-md hover:bg-danger-600 transition-colors"
                   >
                     <X size={14} />
                   </button>
@@ -380,7 +377,7 @@ export default function ChatPage() {
                 <button
                   type="submit"
                   disabled={sending || (!input.trim() && !selectedImage)}
-                  className="w-10 h-10 rounded-full bg-brand-gradient text-white flex items-center justify-center disabled:opacity-40 hover:shadow-md active:scale-95 transition-all flex-shrink-0"
+                  className="w-10 h-10 rounded-full bg-brand-600 text-white flex items-center justify-center disabled:opacity-40 hover:bg-brand-700 hover:shadow-md active:scale-95 transition-all flex-shrink-0"
                 >
                   <Send size={17} />
                 </button>

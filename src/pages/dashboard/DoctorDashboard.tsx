@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Loader2, AlertCircle, CalendarX, Plus, Trash2, CalendarDays, Pencil } from 'lucide-react';
+import { LogOut, Loader2, CalendarX, Plus, Trash2, CalendarDays, Pencil } from 'lucide-react';
 import { doctorApi } from '../../api/doctorApi';
 import { appointmentApi } from '../../api/appointmentApi';
 import { availabilityApi } from '../../api/availabilityApi';
 import { Appointment, Availability, DayOfWeek, DoctorProfile } from '../../types';
 import AppointmentCard from '../../components/appointments/AppointmentCard';
 import EditProfileModal from '../../components/profile/EditProfileModal';
+import Button from '../../components/ui/Button';
+import Alert from '../../components/ui/Alert';
+import Badge, { type BadgeVariant } from '../../components/ui/Badge';
 
 type StatusFilter = 'ALL' | Appointment['status'];
 
@@ -32,6 +35,12 @@ const DAY_LABELS: Record<DayOfWeek, string> = {
 };
 
 const DAYS: DayOfWeek[] = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+
+const VERIFICATION_BADGE: Record<DoctorProfile['verificationStatus'], { variant: BadgeVariant; label: string }> = {
+  VERIFIED: { variant: 'success', label: 'موثق' },
+  PENDING: { variant: 'warning', label: 'بانتظار التوثيق' },
+  REJECTED: { variant: 'danger', label: 'مرفوض' },
+};
 
 export default function DoctorDashboard() {
   const { user, logout } = useAuth();
@@ -161,18 +170,20 @@ export default function DoctorDashboard() {
             <p className="text-slate-500">لوحة تحكم الطبيب - منصة أديم</p>
             {profile && (
               <div className="mt-2 flex items-center gap-2">
-                <span className={`text-xs px-3 py-1 rounded-full font-bold ${profile.verificationStatus === 'VERIFIED' ? 'bg-emerald-100 text-emerald-700' : profile.verificationStatus === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
-                  {profile.verificationStatus === 'VERIFIED' ? '✓ موثق' : profile.verificationStatus === 'PENDING' ? '⏳ بانتظار التوثيق' : '✗ مرفوض'}
-                </span>
+                <Badge variant={VERIFICATION_BADGE[profile.verificationStatus].variant}>
+                  {VERIFICATION_BADGE[profile.verificationStatus].label}
+                </Badge>
                 <span className="text-xs text-slate-400">{profile.specialty}</span>
               </div>
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => setEditingProfile(true)} className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50">
+            <Button variant="secondary" onClick={() => setEditingProfile(true)}>
               <Pencil size={16} /> تعديل البيانات
-            </button>
-            <button onClick={handleLogout} className="flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-red-200 text-red-600 font-bold rounded-xl hover:bg-red-50"><LogOut size={18} /> تسجيل الخروج</button>
+            </Button>
+            <Button variant="outline-danger" onClick={handleLogout}>
+              <LogOut size={18} /> تسجيل الخروج
+            </Button>
           </div>
         </div>
 
@@ -185,13 +196,13 @@ export default function DoctorDashboard() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 overflow-x-auto whitespace-nowrap pb-1 -mx-4 px-4 md:mx-0 md:px-0">
-          <button onClick={() => setActiveTab('appointments')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'appointments' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
+          <button onClick={() => setActiveTab('appointments')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'appointments' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
             المواعيد
           </button>
-          <button onClick={() => setActiveTab('schedule')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'schedule' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
+          <button onClick={() => setActiveTab('schedule')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'schedule' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
             جدول العمل
           </button>
-          <button onClick={() => setActiveTab('profile')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'profile' ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
+          <button onClick={() => setActiveTab('profile')} className={`shrink-0 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'profile' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}>
             الملف التعريفي
           </button>
         </div>
@@ -201,9 +212,7 @@ export default function DoctorDashboard() {
           appointmentsLoading ? (
             <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 text-brand-600 animate-spin" /></div>
           ) : appointmentsError ? (
-            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold flex items-center gap-2">
-              <AlertCircle size={18} /> {appointmentsError}
-            </div>
+            <Alert variant="danger">{appointmentsError}</Alert>
           ) : appointments.length === 0 ? (
             <div className="bg-white rounded-2xl border border-slate-100 p-8 shadow-sm text-center">
               <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-50 flex items-center justify-center mb-4">
@@ -248,7 +257,7 @@ export default function DoctorDashboard() {
                     <button
                       key={s}
                       onClick={() => setStatusFilter(s)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 ${statusFilter === s ? 'bg-brand-gradient text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-brand-200'}`}
+                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-1.5 ${statusFilter === s ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200 hover:border-brand-200'}`}
                     >
                       {STATUS_FILTER_LABELS[s]}
                       <span className={`text-xs ${statusFilter === s ? 'text-white/80' : 'text-slate-400'}`}>({statusCounts[s]})</span>
@@ -298,11 +307,11 @@ export default function DoctorDashboard() {
                   <label className="block text-sm font-bold text-slate-700 mb-2">إلى</label>
                   <input type="time" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" dir="ltr" required />
                 </div>
-                <button type="submit" disabled={addingAvailability} className="px-5 py-3 bg-brand-gradient text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap">
-                  {addingAvailability ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />} إضافة
-                </button>
+                <Button type="submit" loading={addingAvailability} className="whitespace-nowrap">
+                  {!addingAvailability && <Plus size={18} />} إضافة
+                </Button>
               </form>
-              {availabilityError && <p className="mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">{availabilityError}</p>}
+              {availabilityError && <Alert variant="danger" className="mt-3">{availabilityError}</Alert>}
             </div>
 
             <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
@@ -319,7 +328,7 @@ export default function DoctorDashboard() {
                         <span className="font-bold text-sm">{DAY_LABELS[a.dayOfWeek]}</span>
                         <span className="text-sm text-slate-500" dir="ltr">{a.startTime.slice(0, 5)} - {a.endTime.slice(0, 5)}</span>
                       </div>
-                      <button onClick={() => handleDeleteAvailability(a.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <button onClick={() => handleDeleteAvailability(a.id)} className="p-2 text-danger-500 hover:bg-danger-50 rounded-lg transition-colors">
                         <Trash2 size={16} />
                       </button>
                     </div>
@@ -335,12 +344,9 @@ export default function DoctorDashboard() {
           <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold">بياناتي</h2>
-              <button
-                onClick={() => setEditingProfile(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50"
-              >
+              <Button variant="secondary" size="sm" onClick={() => setEditingProfile(true)}>
                 <Pencil size={14} /> تعديل
-              </button>
+              </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label className="block text-sm font-bold text-slate-500 mb-1">الاسم</label><p className="font-semibold">{profile.fullName}</p></div>
@@ -349,9 +355,9 @@ export default function DoctorDashboard() {
               <div><label className="block text-sm font-bold text-slate-500 mb-1">التخصص</label><p className="font-semibold">{profile.specialty}</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">سعر الجلسة</label><p className="font-semibold">{profile.pricePerSession} ر.س</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">حالة التوثيق</label>
-                <span className={`text-sm px-3 py-1 rounded-full font-bold ${profile.verificationStatus === 'VERIFIED' ? 'bg-emerald-100 text-emerald-700' : profile.verificationStatus === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
-                  {profile.verificationStatus === 'VERIFIED' ? 'موثق' : profile.verificationStatus === 'PENDING' ? 'بانتظار التوثيق' : 'مرفوض'}
-                </span>
+                <Badge variant={VERIFICATION_BADGE[profile.verificationStatus].variant} className="text-sm">
+                  {VERIFICATION_BADGE[profile.verificationStatus].label}
+                </Badge>
               </div>
             </div>
             {profile.bio && <div className="mt-4"><label className="block text-sm font-bold text-slate-500 mb-1">نبذة</label><p className="text-slate-700">{profile.bio}</p></div>}

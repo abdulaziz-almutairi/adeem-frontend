@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { X, Loader2, User as UserIcon, Phone, CheckCircle2 } from 'lucide-react';
+import { X, User as UserIcon, Phone, CheckCircle2 } from 'lucide-react';
 import { authApi } from '../../api/authApi';
 import { useAuth } from '../../context/AuthContext';
+import Button from '../ui/Button';
+import Alert from '../ui/Alert';
 
 const PHONE_PATTERN = /^05[0-9]{8}$/;
 
@@ -71,7 +73,7 @@ export default function EditProfileModal({ onClose, onSaved }: EditProfileModalP
 
         {success ? (
           <div className="p-10 flex flex-col items-center gap-3 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-success-100 text-success-600 flex items-center justify-center">
               <CheckCircle2 size={28} />
             </div>
             <p className="font-bold text-dark-900">تم حفظ التعديلات بنجاح</p>
@@ -121,28 +123,15 @@ export default function EditProfileModal({ onClose, onSaved }: EditProfileModalP
               <p className="text-xs text-slate-400 mt-1.5">لا يمكن تغيير البريد الإلكتروني حالياً</p>
             </div>
 
-            {error && (
-              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold">
-                {error}
-              </div>
-            )}
+            {error && <Alert variant="danger">{error}</Alert>}
 
             <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all"
-              >
+              <Button type="button" variant="secondary" onClick={onClose} className="flex-1">
                 إلغاء
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="flex-1 py-3 bg-brand-gradient text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {saving ? <Loader2 size={16} className="animate-spin" /> : null}
+              </Button>
+              <Button type="submit" loading={saving} className="flex-1">
                 حفظ التعديلات
-              </button>
+              </Button>
             </div>
           </form>
         )}

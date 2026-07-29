@@ -4,6 +4,7 @@ import { Video, Loader2, AlertCircle, ArrowRight, ExternalLink } from 'lucide-re
 import { appointmentApi } from '../../api/appointmentApi';
 import { useAuth } from '../../context/AuthContext';
 import { Appointment } from '../../types';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('ar-SA', { dateStyle: 'medium', timeStyle: 'short' });
@@ -62,24 +63,24 @@ export default function VideoCallPage() {
 
       {error ? (
         <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-red-500/10 flex items-center justify-center mb-4">
-            <AlertCircle className="text-red-400" size={32} />
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-danger-500/10 flex items-center justify-center mb-4">
+            <AlertCircle className="text-danger-400" size={32} />
           </div>
           <h2 className="text-xl font-bold mb-2">تعذّر فتح المكالمة</h2>
           <p className="text-slate-400 text-sm">{error}</p>
         </div>
       ) : appointment && appointment.status !== 'CONFIRMED' ? (
         <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 flex items-center justify-center mb-4">
-            <AlertCircle className="text-amber-400" size={32} />
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-warning-500/10 flex items-center justify-center mb-4">
+            <AlertCircle className="text-warning-400" size={32} />
           </div>
           <h2 className="text-xl font-bold mb-2">الموعد غير مؤكد بعد</h2>
           <p className="text-slate-400 text-sm">رابط المكالمة يظهر بعد تأكيد الدفع مباشرة</p>
         </div>
       ) : appointment && !appointment.meetingLink ? (
         <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/10 flex items-center justify-center mb-4">
-            <AlertCircle className="text-amber-400" size={32} />
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-warning-500/10 flex items-center justify-center mb-4">
+            <AlertCircle className="text-warning-400" size={32} />
           </div>
           <h2 className="text-xl font-bold mb-2">رابط المكالمة غير جاهز بعد</h2>
           <p className="text-slate-400 text-sm">حاول تحديث الصفحة بعد قليل</p>
@@ -95,7 +96,7 @@ export default function VideoCallPage() {
             href={appointment.meetingLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-brand-gradient text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
+            className={buttonClasses('primary', 'lg')}
           >
             <ExternalLink size={18} /> الانضمام لمكالمة Zoom
           </a>

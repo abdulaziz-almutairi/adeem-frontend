@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CreditCard, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { CreditCard, Loader2, CheckCircle2 } from 'lucide-react';
 import { paymentApi } from '../../api/paymentApi';
 import { Payment } from '../../types';
+import Button from '../../components/ui/Button';
+import Alert from '../../components/ui/Alert';
 
 export default function PaymentPage() {
   const { appointmentId } = useParams();
@@ -50,8 +52,8 @@ export default function PaymentPage() {
       <div className="relative z-10 bg-white rounded-2xl p-8 shadow-xl border border-slate-100 max-w-md w-full text-center">
         {confirmed ? (
           <>
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
-              <CheckCircle2 className="text-emerald-500" size={28} />
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-success-50 flex items-center justify-center mb-4">
+              <CheckCircle2 className="text-success-500" size={28} />
             </div>
             <h2 className="text-xl font-bold mb-2">تم تأكيد الدفع بنجاح</h2>
             <p className="text-slate-500 text-sm">جاري تحويلك إلى لوحة التحكم...</p>
@@ -71,19 +73,11 @@ export default function PaymentPage() {
               </div>
             )}
 
-            {error && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold flex items-center gap-2">
-                <AlertCircle size={18} /> {error}
-              </div>
-            )}
+            {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
 
-            <button
-              onClick={handleConfirm}
-              disabled={!payment || confirming}
-              className="w-full py-3 bg-brand-gradient text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {confirming ? <><Loader2 size={18} className="animate-spin" /> جاري التأكيد...</> : 'تأكيد الدفع (وضع تجريبي)'}
-            </button>
+            <Button onClick={handleConfirm} disabled={!payment} loading={confirming} size="lg" className="w-full">
+              {confirming ? 'جاري التأكيد...' : 'تأكيد الدفع (وضع تجريبي)'}
+            </Button>
           </>
         )}
       </div>

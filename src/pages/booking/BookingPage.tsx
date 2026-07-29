@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarClock, Loader2, AlertCircle, CheckCircle2, Video, MessageCircle } from 'lucide-react';
+import { CalendarClock, Loader2, CheckCircle2, Video, MessageCircle } from 'lucide-react';
 import { doctorApi } from '../../api/doctorApi';
 import { appointmentApi } from '../../api/appointmentApi';
 import { DoctorPublic } from '../../types';
+import Button from '../../components/ui/Button';
+import Alert from '../../components/ui/Alert';
 
 function formatTime(time: string) {
   // "09:00:00" -> "09:00"
@@ -96,15 +98,11 @@ export default function BookingPage() {
           <p className="text-slate-500 mt-2">اختر طبيب الجلدية، ثم الموعد المناسب لك</p>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-semibold flex items-center gap-2">
-            <AlertCircle size={18} /> {error}
-          </div>
-        )}
+        {error && <Alert variant="danger" className="mb-6">{error}</Alert>}
 
         <div className="bg-white rounded-2xl p-6 shadow-xl border border-slate-100 mb-6">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 shrink-0 rounded-full bg-brand-gradient text-white flex items-center justify-center text-sm">1</span>
+            <span className="w-8 h-8 shrink-0 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm">1</span>
             اختر طبيب الجلدية
           </h2>
           {doctors.length === 0 && !error ? (
@@ -132,7 +130,7 @@ export default function BookingPage() {
         {selectedDoctor && (
           <div className="bg-white rounded-2xl p-6 shadow-xl border border-slate-100 mb-6">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="w-8 h-8 shrink-0 rounded-full bg-brand-gradient text-white flex items-center justify-center text-sm">2</span>
+              <span className="w-8 h-8 shrink-0 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm">2</span>
               اختر التاريخ ونوع الاستشارة
             </h2>
 
@@ -173,9 +171,7 @@ export default function BookingPage() {
             {slotsLoading ? (
               <div className="py-6 flex justify-center"><Loader2 className="w-6 h-6 text-brand-600 animate-spin" /></div>
             ) : slotsError ? (
-              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2">
-                <AlertCircle size={16} /> {slotsError}
-              </p>
+              <Alert variant="warning">{slotsError}</Alert>
             ) : slots.length === 0 ? (
               <p className="text-slate-400 text-sm text-center py-4">لا توجد أوقات فاضية بهذا اليوم</p>
             ) : (
@@ -185,7 +181,7 @@ export default function BookingPage() {
                     key={slot}
                     type="button"
                     onClick={() => setSelectedSlot(slot)}
-                    className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${selectedSlot === slot ? 'border-brand-500 bg-brand-gradient text-white' : 'border-slate-200 text-slate-600 hover:border-brand-300'}`}
+                    className={`px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all ${selectedSlot === slot ? 'border-brand-600 bg-brand-600 text-white hover:bg-brand-700' : 'border-slate-200 text-slate-600 hover:border-brand-300'}`}
                     dir="ltr"
                   >
                     {formatTime(slot)}
@@ -198,8 +194,8 @@ export default function BookingPage() {
 
         {selectedDoctor && selectedSlot && (
           <div className="bg-white rounded-2xl p-6 shadow-xl border border-slate-100 text-center">
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
-              <CheckCircle2 className="text-emerald-500" size={28} />
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-success-50 flex items-center justify-center mb-4">
+              <CheckCircle2 className="text-success-500" size={28} />
             </div>
             <h2 className="text-xl font-bold mb-2">تأكيد الحجز</h2>
             <p className="text-slate-500 text-sm max-w-md mx-auto mb-4">
@@ -207,17 +203,11 @@ export default function BookingPage() {
               بسعر {selectedDoctor.pricePerSession} ر.س
             </p>
 
-            {bookingError && (
-              <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3">{bookingError}</p>
-            )}
+            {bookingError && <Alert variant="danger" className="mb-4">{bookingError}</Alert>}
 
-            <button
-              onClick={handleBook}
-              disabled={booking}
-              className="px-8 py-3 bg-brand-gradient text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 inline-flex items-center gap-2"
-            >
-              {booking ? <><Loader2 size={18} className="animate-spin" /> جاري الحجز...</> : <><CalendarClock size={18} /> تأكيد الحجز والانتقال للدفع</>}
-            </button>
+            <Button onClick={handleBook} loading={booking} size="lg">
+              {!booking && <CalendarClock size={18} />} {booking ? 'جاري الحجز...' : 'تأكيد الحجز والانتقال للدفع'}
+            </Button>
           </div>
         )}
       </div>

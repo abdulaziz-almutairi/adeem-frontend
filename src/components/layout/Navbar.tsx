@@ -5,6 +5,7 @@ import { useNotifications } from '../../context/NotificationContext';
 import { LogOut, Menu, X } from 'lucide-react';
 import logo from '../../assets/logo.svg';
 import { dashboardPathForRole } from '../../utils/roles';
+import { buttonClasses } from '../ui/buttonStyles';
 
 const NAV_LINKS = [
   { to: '/', label: 'الرئيسية' },
@@ -29,7 +30,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
 
         <Link to="/" className="flex items-center" onClick={() => setMenuOpen(false)}>
-          <img src={logo} alt="شعار أديم" className="h-10 sm:h-12 w-auto object-contain" />
+          <img src={logo} alt="شعار أديم" className="h-12 sm:h-14 w-auto object-contain" />
         </Link>
 
         <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
@@ -43,28 +44,25 @@ export default function Navbar() {
             <>
               <Link
                 to={dashboardPathForRole(user.role)}
-                className="relative px-5 py-2 text-sm font-bold text-white bg-brand-gradient rounded-xl hover:shadow-lg transition-all flex items-center gap-2"
+                className={buttonClasses('primary', 'md', 'relative')}
               >
                 <i className="fas fa-th-large"></i> لوحة التحكم
                 {totalUnread > 0 && (
-                  <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white">
+                  <span className="absolute -top-1.5 -end-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-accent-600 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white">
                     {totalUnread > 9 ? '9+' : totalUnread}
                   </span>
                 )}
               </Link>
 
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-red-500 border-2 border-red-200 rounded-xl hover:bg-red-50 transition-all"
-              >
+              <button onClick={handleLogout} className={buttonClasses('outline-danger', 'md')}>
                 <LogOut size={18} />
                 خروج
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="px-5 py-2 text-sm font-bold text-brand-600 border-2 border-brand-200 rounded-xl hover:bg-brand-50 transition-all">دخول</Link>
-              <Link to="/register" className="px-5 py-2 text-sm font-bold text-white bg-brand-gradient rounded-xl hover:shadow-lg transition-all">حساب جديد</Link>
+              <Link to="/login" className={buttonClasses('outline-brand', 'md')}>دخول</Link>
+              <Link to="/register" className={buttonClasses('primary', 'md')}>حساب جديد</Link>
             </>
           )}
         </div>
@@ -98,28 +96,25 @@ export default function Navbar() {
               <Link
                 to={dashboardPathForRole(user.role)}
                 onClick={() => setMenuOpen(false)}
-                className="relative flex items-center justify-center gap-2 px-5 py-3 text-sm font-bold text-white bg-brand-gradient rounded-xl"
+                className={buttonClasses('primary', 'md', 'relative w-full')}
               >
                 <i className="fas fa-th-large"></i> لوحة التحكم
                 {totalUnread > 0 && (
-                  <span className="absolute -top-1.5 end-4 min-w-[18px] h-[18px] px-1 rounded-full bg-accent-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white">
+                  <span className="absolute -top-1.5 end-4 min-w-[18px] h-[18px] px-1 rounded-full bg-accent-600 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white">
                     {totalUnread > 9 ? '9+' : totalUnread}
                   </span>
                 )}
               </Link>
 
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center gap-2 px-4 py-3 mt-2 text-sm font-bold text-red-500 border-2 border-red-200 rounded-xl hover:bg-red-50 transition-all"
-              >
+              <button onClick={handleLogout} className={buttonClasses('outline-danger', 'md', 'mt-2 w-full')}>
                 <LogOut size={18} />
                 خروج
               </button>
             </>
           ) : (
             <div className="flex flex-col gap-2">
-              <Link to="/login" onClick={() => setMenuOpen(false)} className="text-center px-5 py-3 text-sm font-bold text-brand-600 border-2 border-brand-200 rounded-xl hover:bg-brand-50 transition-all">دخول</Link>
-              <Link to="/register" onClick={() => setMenuOpen(false)} className="text-center px-5 py-3 text-sm font-bold text-white bg-brand-gradient rounded-xl hover:shadow-lg transition-all">حساب جديد</Link>
+              <Link to="/login" onClick={() => setMenuOpen(false)} className={buttonClasses('outline-brand', 'md', 'w-full')}>دخول</Link>
+              <Link to="/register" onClick={() => setMenuOpen(false)} className={buttonClasses('primary', 'md', 'w-full')}>حساب جديد</Link>
             </div>
           )}
         </div>

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { UserPlus, Loader2, CheckCircle } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -92,20 +94,13 @@ export default function RegisterPage() {
           <p className="text-slate-500 text-sm mt-1">انضم لمنصة أديم الطبية</p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-semibold">
-            <i className="fas fa-exclamation-circle ml-1"></i> {error}
-          </div>
-        )}
+        {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
 
         {success && (
-          <div className="mb-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold flex items-start gap-2">
-            <CheckCircle size={18} className="flex-shrink-0 mt-0.5" />
-            <div>
-              <p>{success}</p>
-              <p className="mt-1 text-xs">جاري التحويل لصفحة تسجيل الدخول...</p>
-            </div>
-          </div>
+          <Alert variant="success" className="mb-4">
+            <p>{success}</p>
+            <p className="mt-1 text-xs">جاري التحويل لصفحة تسجيل الدخول...</p>
+          </Alert>
         )}
 
         {!success && (
@@ -170,17 +165,9 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-brand-gradient text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <><Loader2 size={18} className="animate-spin" /> جاري إنشاء الحساب...</>
-              ) : (
-                <><UserPlus size={18} /> إنشاء الحساب</>
-              )}
-            </button>
+            <Button type="submit" loading={loading} size="lg" className="w-full">
+              {!loading && <UserPlus size={18} />} {loading ? 'جاري إنشاء الحساب...' : 'إنشاء الحساب'}
+            </Button>
           </form>
         )}
 

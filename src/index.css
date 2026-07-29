@@ -24,6 +24,19 @@ body {
   background-color: #f8fafc;
 }
 
+::selection {
+  background-color: #e6c8ec; /* brand-200 */
+  color: #391542; /* brand-900 */
+}
+
+/* Consistent keyboard-navigation focus ring across every interactive element,
+   independent of each component's own hover/active styling. */
+:focus-visible {
+  outline: 2px solid #9a52ac; /* brand-500 */
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .adeem-bg {
   position: relative;
   overflow: hidden;
@@ -33,21 +46,21 @@ body {
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
-  opacity: 0.4;
+  opacity: 0.35;
   z-index: 0;
   animation: float 10s infinite alternate ease-in-out;
 }
 .adeem-bg::before {
   width: 500px;
   height: 500px;
-  background: #9333ea;
+  background: #7a2e8f; /* brand-600 */
   top: -150px;
   right: -150px;
 }
 .adeem-bg::after {
   width: 450px;
   height: 450px;
-  background: #e11d48;
+  background: #e31c6e; /* accent-500 */
   bottom: -100px;
   left: -100px;
   animation-delay: 3s;
@@ -58,8 +71,28 @@ body {
   100% { transform: translate(40px, 30px) scale(1.1); }
 }
 
+@keyframes mark-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+.animate-mark-float { animation: mark-float 6s ease-in-out infinite; }
+
 .glass { background: rgba(255,255,255,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.4); }
-.input-field:focus { outline: none; border-color: #9333ea; box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2); }
+
+.dot-pattern {
+  background-image: radial-gradient(rgba(255,255,255,0.9) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+.input-field {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input-field:hover:not(:disabled) { border-color: #d29fdd; } /* brand-300 */
+.input-field:focus {
+  outline: none;
+  border-color: #7a2e8f; /* brand-600 */
+  box-shadow: 0 0 0 3px rgba(122, 46, 143, 0.15);
+}
 
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(-12px); }
