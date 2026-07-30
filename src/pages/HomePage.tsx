@@ -61,7 +61,7 @@ export default function HomePage() {
       {/* Features */}
       <section className="py-20 bg-slate-50">
         <div className="max-w-6xl mx-auto px-6">
-          <h2 className="text-3xl font-black text-dark-900 mb-12 text-center">لماذا أديم للجلدية؟</h2>
+          <h2 className="text-3xl font-black text-dark-900 mb-12 text-center">لماذا أديم ؟</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               { icon: Shield, title: 'خصوصية تامة', desc: 'استشارة سرية وخاصة من منزلك' },
