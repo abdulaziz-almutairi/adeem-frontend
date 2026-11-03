@@ -47,3 +47,14 @@ jobs:
       - run: npm ci
 
       - run: npm run lint
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Scans the full history. Known historical findings are listed by fingerprint in .gitleaksignore (INT-11).
+      - name: Secret scan (INT-11)
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.28.0 git /repo --redact --no-banner --exit-code 1 --gitleaks-ignore-path /repo/.gitleaksignore
