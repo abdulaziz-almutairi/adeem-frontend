@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bot, Send, Loader2, User, ImagePlus, X, PanelLeftOpen } from 'lucide-react';
+import { Bot, Send, Loader2, User, ImagePlus, X, PanelLeftOpen, RotateCw } from 'lucide-react';
 import { chatApi } from '../../api/chatApi';
 import { useAuth } from '../../context/AuthContext';
-import { ChatConversationSummary, ChatMessage } from '../../types';
+import { ChatbotMessage, ChatConversationSummary, ChatMessage } from '../../types';
 import ChatSidebar from '../../components/chat/ChatSidebar';
 import Alert from '../../components/ui/Alert';
+import Button from '../../components/ui/Button';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB - نفس الحد الأقصى بالباك إند
@@ -43,6 +44,22 @@ function saveConversationList(userId: number, list: ChatConversationSummary[]) {
   localStorage.setItem(listStorageKey(userId), JSON.stringify(list));
 }
 
+// السجل المحلي هو المرجع الوحيد للمحادثات، فلا نحذف منه إلا إذا أكد السيرفر أن المحادثة غير موجودة
+// أو لا تخص المستخدم (400 حالياً، و404 احتياطاً). انقطاع الشبكة و401 و403 و5xx تُبقي المحادثة (FE-04)
+function isConversationGone(err: unknown) {
+  const status = (err as { response?: { status?: number } } | null)?.response?.status;
+  return status === 400 || status === 404;
+}
+
+function toChatMessages(history: ChatbotMessage[]): ChatMessage[] {
+  return history.map((m, idx) => ({
+    id: `h-${idx}-${m.createdAt}`,
+    sender: m.senderType === 'USER' ? 'user' : 'ai',
+    text: m.content,
+    timestamp: new Date(m.createdAt),
+  }));
+}
+
 export default function ChatPage() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -52,6 +69,8 @@ export default function ChatPage() {
   const [error, setError] = useState('');
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [conversations, setConversations] = useState<ChatConversationSummary[]>([]);
+  // محادثة تعذّر تحميلها مؤقتاً (شبكة/جلسة/خطأ سيرفر) - تبقى في السجل مع زر إعادة المحاولة
+  const [failedLoad, setFailedLoad] = useState<{ id: number; legacy: boolean } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -64,27 +83,61 @@ export default function ChatPage() {
 
   const loadConversation = async (userId: number, id: number) => {
     setLoadingHistory(true);
+    setFailedLoad(null);
     try {
       const history = await chatApi.getHistory(id);
       setConversationId(id);
-      setMessages(history.map((m, idx) => ({
-        id: `h-${idx}-${m.createdAt}`,
-        sender: m.senderType === 'USER' ? 'user' : 'ai',
-        text: m.content,
-        timestamp: new Date(m.createdAt),
-      })));
-    } catch {
-      // المحادثة القديمة لم تعد متاحة (محذوفة/غير مصرح بها) - نحذفها من السجل المحلي
-      setConversations(prev => {
-        const next = prev.filter(c => c.id !== id);
-        saveConversationList(userId, next);
-        return next;
-      });
+      setMessages(toChatMessages(history));
+    } catch (err) {
+      if (isConversationGone(err)) {
+        // المحادثة لم تعد متاحة (محذوفة/لا تخص المستخدم) - نحذفها من السجل المحلي
+        setConversations(prev => {
+          const next = prev.filter(c => c.id !== id);
+          saveConversationList(userId, next);
+          return next;
+        });
+      } else {
+        setFailedLoad({ id, legacy: false });
+      }
       setConversationId(null);
       setMessages([]);
     } finally {
       setLoadingHistory(false);
     }
+  };
+
+  // ترحيل صيغة المحادثة الواحدة القديمة إلى السجل
+  const loadLegacyConversation = async (userId: number, id: number) => {
+    setLoadingHistory(true);
+    setFailedLoad(null);
+    try {
+      const history = await chatApi.getHistory(id);
+      const firstUserMessage = history.find(m => m.senderType === 'USER');
+      const migrated: ChatConversationSummary[] = [{
+        id,
+        title: deriveTitle(firstUserMessage?.content),
+        updatedAt: history[history.length - 1]?.createdAt || new Date().toISOString(),
+      }];
+      setConversations(migrated);
+      saveConversationList(userId, migrated);
+      localStorage.removeItem(legacyStorageKey(userId));
+      setConversationId(id);
+      setMessages(toChatMessages(history));
+    } catch (err) {
+      if (isConversationGone(err)) {
+        localStorage.removeItem(legacyStorageKey(userId));
+      } else {
+        setFailedLoad({ id, legacy: true });
+      }
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const handleRetryLoad = () => {
+    if (!user || !failedLoad) return;
+    if (failedLoad.legacy) loadLegacyConversation(user.id, failedLoad.id);
+    else loadConversation(user.id, failedLoad.id);
   };
 
   // تحميل سجل المحادثات المحفوظ محلياً، مع ترحيل صيغة المحادثة الواحدة القديمة إن وُجدت
@@ -107,30 +160,7 @@ export default function ChatPage() {
       return;
     }
 
-    const id = Number(legacyId);
-    chatApi.getHistory(id)
-      .then((history) => {
-        const firstUserMessage = history.find(m => m.senderType === 'USER');
-        const migrated: ChatConversationSummary[] = [{
-          id,
-          title: deriveTitle(firstUserMessage?.content),
-          updatedAt: history[history.length - 1]?.createdAt || new Date().toISOString(),
-        }];
-        setConversations(migrated);
-        saveConversationList(user.id, migrated);
-        localStorage.removeItem(legacyStorageKey(user.id));
-        setConversationId(id);
-        setMessages(history.map((m, idx) => ({
-          id: `h-${idx}-${m.createdAt}`,
-          sender: m.senderType === 'USER' ? 'user' : 'ai',
-          text: m.content,
-          timestamp: new Date(m.createdAt),
-        })));
-      })
-      .catch(() => {
-        localStorage.removeItem(legacyStorageKey(user.id));
-      })
-      .finally(() => setLoadingHistory(false));
+    loadLegacyConversation(user.id, Number(legacyId));
   }, [user]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,6 +190,7 @@ export default function ChatPage() {
   };
 
   const handleNewChat = () => {
+    setFailedLoad(null);
     setConversationId(null);
     setMessages([]);
     setError('');
@@ -185,6 +216,7 @@ export default function ChatPage() {
       saveConversationList(user.id, next);
       return next;
     });
+    if (failedLoad?.id === id) setFailedLoad(null);
     if (id === conversationId) {
       setConversationId(null);
       setMessages([]);
@@ -288,6 +320,16 @@ export default function ChatPage() {
             <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-gradient-to-b from-white to-slate-50/60">
               {loadingHistory ? (
                 <div className="h-full flex items-center justify-center"><Loader2 className="w-6 h-6 text-brand-600 animate-spin" /></div>
+              ) : failedLoad ? (
+                <div className="h-full flex flex-col items-center justify-center text-center gap-3">
+                  <Alert variant="warning" className="max-w-sm">
+                    <span role="alert">تعذّر تحميل المحادثة حالياً، وما زالت محفوظة في سجلك. تحقق من اتصالك وحاول مرة أخرى</span>
+                  </Alert>
+                  <Button variant="outline-brand" size="sm" onClick={handleRetryLoad}>
+                    <RotateCw size={14} />
+                    إعادة المحاولة
+                  </Button>
+                </div>
               ) : messages.length === 0 && (
                 <div className="h-full flex flex-col items-center justify-center text-center gap-3">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-50 to-accent-400/10 flex items-center justify-center">
