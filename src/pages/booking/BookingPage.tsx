@@ -6,14 +6,11 @@ import { appointmentApi } from '../../api/appointmentApi';
 import { DoctorPublic } from '../../types';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
+import { clinicTodayISO } from '../../utils/clinicDate';
 
 function formatTime(time: string) {
   // "09:00:00" -> "09:00"
   return time.slice(0, 5);
-}
-
-function todayISO() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 export default function BookingPage() {
@@ -23,7 +20,8 @@ export default function BookingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [date, setDate] = useState(todayISO());
+  // اليوم بتوقيت العيادة وليس UTC، حتى لا يظهر الأمس من منتصف الليل إلى 03:00 بالرياض (FE-03)
+  const [date, setDate] = useState(clinicTodayISO);
   const [consultationType, setConsultationType] = useState<'CALL' | 'CHAT'>('CALL');
   const [slots, setSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
@@ -136,12 +134,17 @@ export default function BookingPage() {
 
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="flex-1">
-                <label className="block text-sm font-bold text-slate-700 mb-2">التاريخ</label>
+                <label htmlFor="booking-date" className="block text-sm font-bold text-slate-700 mb-2">التاريخ</label>
                 <input
+                  id="booking-date"
                   type="date"
                   value={date}
-                  min={todayISO()}
-                  onChange={(e) => setDate(e.target.value)}
+                  min={clinicTodayISO()}
+                  onChange={(e) => {
+                    // التاريخ المكتوب يدوياً قبل اليوم يُستبدل بتاريخ اليوم
+                    const today = clinicTodayISO();
+                    setDate(e.target.value && e.target.value < today ? today : e.target.value);
+                  }}
                   className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm"
                   dir="ltr"
                 />
