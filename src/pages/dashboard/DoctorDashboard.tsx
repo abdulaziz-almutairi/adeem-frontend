@@ -11,6 +11,9 @@ import EditProfileModal from '../../components/profile/EditProfileModal';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
 import Badge, { type BadgeVariant } from '../../components/ui/Badge';
+import ProfilePictureUploader from '../../components/doctor/ProfilePictureUploader';
+import MyQualifications from '../../components/doctor/MyQualifications';
+import { experienceLabel, rankLabel } from '../../utils/doctorRank';
 
 type StatusFilter = 'ALL' | Appointment['status'];
 
@@ -354,6 +357,8 @@ export default function DoctorDashboard() {
               <div><label className="block text-sm font-bold text-slate-500 mb-1">رقم الهاتف</label><p className="font-semibold" dir="ltr">{profile.phoneNumber || '—'}</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">التخصص</label><p className="font-semibold">{profile.specialty}</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">سعر الجلسة</label><p className="font-semibold">{profile.pricePerSession} ر.س</p></div>
+              <div><label className="block text-sm font-bold text-slate-500 mb-1">المسمى المهني</label><p className="font-semibold">{rankLabel(profile.rank) || '—'}</p></div>
+              <div><label className="block text-sm font-bold text-slate-500 mb-1">الخبرة</label><p className="font-semibold">{experienceLabel(profile.yearsOfExperience) || '—'}</p></div>
               <div><label className="block text-sm font-bold text-slate-500 mb-1">حالة التوثيق</label>
                 <Badge variant={VERIFICATION_BADGE[profile.verificationStatus].variant} className="text-sm">
                   {VERIFICATION_BADGE[profile.verificationStatus].label}
@@ -361,6 +366,17 @@ export default function DoctorDashboard() {
               </div>
             </div>
             {profile.bio && <div className="mt-4"><label className="block text-sm font-bold text-slate-500 mb-1">نبذة</label><p className="text-slate-700">{profile.bio}</p></div>}
+
+            <div className="mt-6 pt-6 border-t border-slate-100">
+              <ProfilePictureUploader
+                name={profile.fullName}
+                url={profile.profilePictureUrl}
+                onUploaded={async () => setProfile(await doctorApi.getMyProfile())}
+              />
+            </div>
+            <div className="mt-6 pt-6 border-t border-slate-100">
+              <MyQualifications doctorProfileId={profile.id} />
+            </div>
           </div>
         )}
       </div>

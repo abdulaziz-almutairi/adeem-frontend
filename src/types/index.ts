@@ -7,12 +7,43 @@ export interface User {
   createdAt?: string;
 }
 
+export type DoctorRank = 'GENERAL_PRACTITIONER' | 'SPECIALIST' | 'CONSULTANT';
+
+export type QualificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+// مؤهل معتمد كما يراه المريض
+export interface QualificationPublic {
+  id: number;
+  degreeName: string;
+  institution: string;
+  fieldOfStudy?: string | null;
+  yearObtained?: number | null;
+}
+
+// مؤهل كما يراه الطبيب صاحبه: مع حالة المراجعة وسبب الرفض
+export interface MyQualification extends QualificationPublic {
+  status: QualificationStatus;
+  rejectionReason?: string | null;
+}
+
+// عنصر في قائمة مراجعة المشرف
+export interface QualificationReviewItem extends QualificationPublic {
+  doctorId: number;
+  doctorName: string;
+  specialty: string;
+  status: QualificationStatus;
+}
+
 export interface DoctorPublic {
   id: number;
   fullName: string;
   specialty: string;
   pricePerSession: number;
-  bio?: string;
+  bio?: string | null;
+  rank?: DoctorRank | null;
+  yearsOfExperience?: number | null;
+  profilePictureUrl?: string | null;
+  doctorQualification?: QualificationPublic[];
   rating?: number;
   reviewsCount?: number;
   verificationStatus?: string;
@@ -29,6 +60,10 @@ export interface DoctorProfile {
   bio?: string;
   verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
   licenseDocumentUrl?: string;
+  rank?: DoctorRank | null;
+  yearsOfExperience?: number | null;
+  profilePictureUrl?: string | null;
+  doctorQualification?: MyQualification[];
 }
 
 export interface Appointment {

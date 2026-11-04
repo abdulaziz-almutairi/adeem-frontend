@@ -14,6 +14,7 @@ import VideoCallPage from './pages/video/VideoCallPage';
 import DoctorDashboard from './pages/dashboard/DoctorDashboard';
 import PatientDashboard from './pages/dashboard/PatientDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
+import DoctorProfilePage from './pages/doctors/DoctorProfilePage';
 import { dashboardPathForRole } from './utils/roles';
 import { Loader2 } from 'lucide-react';
 
@@ -47,6 +48,7 @@ function AppRoutes() {
         />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/booking" element={<ProtectedRoute role="PATIENT"><BookingPage /></ProtectedRoute>} />
+        <Route path="/doctors/:doctorId" element={<ProtectedRoute><DoctorProfilePage /></ProtectedRoute>} />
         <Route path="/ai-chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
         <Route path="/chat/:appointmentId" element={<ProtectedRoute><AppointmentChatPage /></ProtectedRoute>} />
         <Route path="/payment/:appointmentId" element={<ProtectedRoute role="PATIENT"><PaymentPage /></ProtectedRoute>} />

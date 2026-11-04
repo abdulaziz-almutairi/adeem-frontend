@@ -1,3 +1,4 @@
+import type { DoctorRank } from '../types';
 import api from './apiService';
 
 export const authApi = {
@@ -16,14 +17,18 @@ export const authApi = {
     return response.data;
   },
 
+  // يطابق DoctorRegisterDTO في الخادم (QA-004): الاسم بثلاثة أجزاء، والرتبة والخبرة إلزامية، والسعر يُحسب من الرتبة
   registerDoctor: async (data: {
-    fullName: string;
+    firstName: string;
+    secondName: string;
+    lastName: string;
     email: string;
     password: string;
     phoneNumber?: string;
     specialty: string;
+    rank: DoctorRank;
+    experiance: number;
     licenseNumber: string;
-    pricePerSession: number;
     bio?: string;
   }) => {
     const response = await api.post('/doctors/register', data);

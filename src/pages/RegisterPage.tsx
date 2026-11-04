@@ -4,6 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
+import { RANK_LABELS } from '../utils/doctorRank';
+import type { DoctorRank } from '../types';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -14,7 +16,12 @@ export default function RegisterPage() {
     role: 'PATIENT',
     specialty: '',
     licenseNumber: '',
-    pricePerSession: '',
+    // للطبيب: الاسم بثلاثة أجزاء، والرتبة المطلوبة وسنوات الخبرة (يراجعها المشرف عند التوثيق). السعر يُحسب من الرتبة
+    firstName: '',
+    secondName: '',
+    lastName: '',
+    rank: '' as DoctorRank | '',
+    experiance: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -22,7 +29,7 @@ export default function RegisterPage() {
   const { registerPatient, registerDoctor } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -34,20 +41,24 @@ export default function RegisterPage() {
 
     try {
       if (form.role === 'DOCTOR') {
-        if (!form.specialty || !form.licenseNumber || !form.pricePerSession) {
-          setError('يجب إدخال التخصص ورقم الترخيص وسعر الجلسة للأطباء');
+        if (!form.firstName.trim() || !form.secondName.trim() || !form.lastName.trim()
+            || !form.specialty || !form.licenseNumber || !form.rank || form.experiance === '') {
+          setError('يجب إدخال الاسم الثلاثي والتخصص والمسمى المهني وسنوات الخبرة ورقم الترخيص');
           setLoading(false);
           return;
         }
 
         await registerDoctor({
-          fullName: form.fullName,
+          firstName: form.firstName.trim(),
+          secondName: form.secondName.trim(),
+          lastName: form.lastName.trim(),
           email: form.email,
           password: form.password,
           phoneNumber: form.phoneNumber || undefined,
           specialty: form.specialty,
+          rank: form.rank,
+          experiance: Number(form.experiance),
           licenseNumber: form.licenseNumber,
-          pricePerSession: parseFloat(form.pricePerSession),
         });
 
         setSuccess('تم تقديم طلب التسجيل بنجاح! حسابك بانتظار التوثيق من الإدارة.');
@@ -126,10 +137,27 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">الاسم الكامل</label>
-              <input type="text" name="fullName" value={form.fullName} onChange={handleChange} placeholder="" className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required />
-            </div>
+            {form.role === 'DOCTOR' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-bold text-slate-700 mb-2">الاسم الأول</label>
+                  <input id="firstName" type="text" name="firstName" value={form.firstName} onChange={handleChange} className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required />
+                </div>
+                <div>
+                  <label htmlFor="secondName" className="block text-sm font-bold text-slate-700 mb-2">اسم الأب</label>
+                  <input id="secondName" type="text" name="secondName" value={form.secondName} onChange={handleChange} className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-bold text-slate-700 mb-2">اسم العائلة</label>
+                  <input id="lastName" type="text" name="lastName" value={form.lastName} onChange={handleChange} className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required />
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-bold text-slate-700 mb-2">الاسم الكامل</label>
+                <input id="fullName" type="text" name="fullName" value={form.fullName} onChange={handleChange} placeholder="" className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">البريد الإلكتروني</label>
@@ -159,8 +187,18 @@ export default function RegisterPage() {
                   <input type="text" name="licenseNumber" value={form.licenseNumber} onChange={handleChange} placeholder="MOH-XXXXX" className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" dir="ltr" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">سعر الجلسة (ر.س)</label>
-                  <input type="number" name="pricePerSession" value={form.pricePerSession} onChange={handleChange} placeholder="200" className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" dir="ltr" required min="1" step="0.01" />
+                  <label htmlFor="rank" className="block text-sm font-bold text-slate-700 mb-2">المسمى المهني</label>
+                  <select id="rank" name="rank" value={form.rank} onChange={handleChange} className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" required>
+                    <option value="" disabled>اختر المسمى المهني</option>
+                    {(Object.keys(RANK_LABELS) as DoctorRank[]).map(r => (
+                      <option key={r} value={r}>{RANK_LABELS[r]}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">يراجعه المشرف عند توثيق حسابك، وسعر الجلسة يُحدد حسب المسمى المعتمد.</p>
+                </div>
+                <div>
+                  <label htmlFor="experiance" className="block text-sm font-bold text-slate-700 mb-2">سنوات الخبرة</label>
+                  <input id="experiance" type="number" name="experiance" value={form.experiance} onChange={handleChange} placeholder="0" className="input-field w-full px-4 py-3 rounded-xl border-2 border-slate-200 text-sm" dir="ltr" required min="0" max="60" step="1" />
                 </div>
               </div>
             )}

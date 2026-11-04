@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Loader2, ShieldCheck, ShieldX, UserX, Users, Stethoscope } from 'lucide-react';
+import { LogOut, Loader2, ShieldCheck, ShieldX, UserX, Users, Stethoscope, GraduationCap } from 'lucide-react';
+import QualificationReview from '../../components/admin/QualificationReview';
 import { adminApi } from '../../api/adminApi';
 import { DoctorProfile, User } from '../../types';
 import Button from '../../components/ui/Button';
@@ -39,7 +40,8 @@ function formatDate(iso?: string) {
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'doctors' | 'users'>('doctors');
+  const [activeTab, setActiveTab] = useState<'doctors' | 'qualifications' | 'users'>('doctors');
+  const [pendingQualifications, setPendingQualifications] = useState<number | null>(null);
 
   const [pendingDoctors, setPendingDoctors] = useState<DoctorProfile[]>([]);
   const [doctorsLoading, setDoctorsLoading] = useState(true);
@@ -149,6 +151,17 @@ export default function AdminDashboard() {
             )}
           </button>
           <button
+            onClick={() => setActiveTab('qualifications')}
+            className={`shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'qualifications' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
+          >
+            <GraduationCap size={16} /> مراجعة المؤهلات
+            {pendingQualifications !== null && pendingQualifications > 0 && (
+              <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${activeTab === 'qualifications' ? 'bg-white/20 text-white' : 'bg-warning-100 text-warning-700'}`}>
+                {pendingQualifications}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab('users')}
             className={`shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'users' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-200'}`}
           >
@@ -206,6 +219,8 @@ export default function AdminDashboard() {
         )}
 
         {/* Users management */}
+        {activeTab === 'qualifications' && <QualificationReview onCountChange={setPendingQualifications} />}
+
         {activeTab === 'users' && (
           <div>
             <div className="flex flex-wrap gap-2 mb-4">
