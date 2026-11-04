@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { CalendarClock, Loader2, CheckCircle2, Video, MessageCircle } from 'lucide-react';
 import { doctorApi } from '../../api/doctorApi';
 import { appointmentApi } from '../../api/appointmentApi';
 import { DoctorPublic } from '../../types';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
+import DoctorAvatar from '../../components/doctor/DoctorAvatar';
+import { experienceLabel, rankLabel } from '../../utils/doctorRank';
 import { clinicTodayISO } from '../../utils/clinicDate';
 import { apiErrorMessage } from '../../utils/apiError';
 
@@ -17,7 +19,12 @@ function formatTime(time: string) {
 export default function BookingPage() {
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState<DoctorPublic[]>([]);
-  const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
+  const [searchParams] = useSearchParams();
+  // القادم من ملف الطبيب يصل والطبيب محدد مسبقاً
+  const [selectedDoc, setSelectedDoc] = useState<number | null>(() => {
+    const id = Number(searchParams.get('doctorId'));
+    return Number.isInteger(id) && id > 0 ? id : null;
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -124,11 +131,28 @@ export default function BookingPage() {
                   onClick={() => setSelectedDoc(doc.id)}
                   className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedDoc === doc.id ? 'border-brand-500 bg-brand-50' : 'border-slate-100 hover:border-brand-200'}`}
                 >
-                  <h3 className="font-bold">{doc.fullName}</h3>
-                  <p className="text-sm text-brand-600 font-semibold">{doc.specialty}</p>
-                  {doc.bio && <p className="text-xs text-slate-500 mt-1 line-clamp-2">{doc.bio}</p>}
+                  <div className="flex items-center gap-3">
+                    <DoctorAvatar name={doc.fullName} url={doc.profilePictureUrl} size="sm" />
+                    <div className="min-w-0">
+                      <h3 className="font-bold truncate">{doc.fullName}</h3>
+                      <p className="text-sm text-brand-600 font-semibold">
+                        {[rankLabel(doc.rank), doc.specialty].filter(Boolean).join(' · ')}
+                      </p>
+                      {experienceLabel(doc.yearsOfExperience) && (
+                        <p className="text-xs text-slate-500">{experienceLabel(doc.yearsOfExperience)}</p>
+                      )}
+                    </div>
+                  </div>
+                  {doc.bio && <p className="text-xs text-slate-500 mt-2 line-clamp-2">{doc.bio}</p>}
                   <div className="flex justify-between items-center mt-2 text-sm">
                     <span className="font-bold">{doc.pricePerSession} ر.س</span>
+                    <Link
+                      to={`/doctors/${doc.id}`}
+                      onClick={e => e.stopPropagation()}
+                      className="font-bold text-brand-600 hover:text-brand-700"
+                    >
+                      عرض الملف
+                    </Link>
                   </div>
                 </div>
               ))}
