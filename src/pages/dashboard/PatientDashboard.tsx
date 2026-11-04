@@ -31,7 +31,15 @@ export default function PatientDashboard() {
     }
   };
 
-  useEffect(() => { fetchAppointments(); }, []);
+  // التحميل الأول: الحالة تتغير فقط داخل callbacks الطلب (loading يبدأ true)
+  useEffect(() => {
+    let active = true;
+    appointmentApi.getMyAppointmentsAsPatient()
+      .then(res => { if (active) setAppointments(res.slice().sort((a, b) => a.appointmentDate.localeCompare(b.appointmentDate))); })
+      .catch(err => { console.error('فشل جلب المواعيد:', err); if (active) setError('تعذّر جلب مواعيدك حالياً'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const handleCancel = async (id: number) => {
     if (!window.confirm('هل أنت متأكد من إلغاء هذا الموعد؟')) return;

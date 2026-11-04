@@ -7,6 +7,7 @@ import { DoctorPublic } from '../../types';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
 import { clinicTodayISO } from '../../utils/clinicDate';
+import { apiErrorMessage } from '../../utils/apiError';
 
 function formatTime(time: string) {
   // "09:00:00" -> "09:00"
@@ -46,18 +47,28 @@ export default function BookingPage() {
     fetchDoctors();
   }, []);
 
-  useEffect(() => {
-    if (selectedDoc === null) return;
+  // عند تغيير الطبيب أو التاريخ: نصفّر الموعد المختار ونبدأ التحميل أثناء العرض نفسه (نمط React الموصى به)
+  const slotsKey = selectedDoc === null ? null : `${selectedDoc}|${date}`;
+  const [loadedSlotsKey, setLoadedSlotsKey] = useState<string | null>(null);
+  if (slotsKey !== loadedSlotsKey) {
+    setLoadedSlotsKey(slotsKey);
     setSelectedSlot(null);
     setSlotsError('');
-    setSlotsLoading(true);
+    setSlotsLoading(slotsKey !== null);
+  }
+
+  useEffect(() => {
+    if (selectedDoc === null) return;
+    let active = true;
     appointmentApi.getAvailableSlots(selectedDoc, date)
-      .then(setSlots)
+      .then(res => { if (active) setSlots(res); })
       .catch((err) => {
+        if (!active) return;
         setSlots([]);
-        setSlotsError(err.response?.data?.message || 'الطبيب غير متاح بهذا اليوم، جرّب تاريخاً آخر');
+        setSlotsError(apiErrorMessage(err, 'الطبيب غير متاح بهذا اليوم، جرّب تاريخاً آخر'));
       })
-      .finally(() => setSlotsLoading(false));
+      .finally(() => { if (active) setSlotsLoading(false); });
+    return () => { active = false; };
   }, [selectedDoc, date]);
 
   const handleBook = async () => {
@@ -71,8 +82,8 @@ export default function BookingPage() {
         consultationType,
       });
       navigate('/patient/dashboard');
-    } catch (err: any) {
-      setBookingError(err.response?.data?.message || 'تعذّر إتمام الحجز، حاول مرة أخرى');
+    } catch (err) {
+      setBookingError(apiErrorMessage(err, 'تعذّر إتمام الحجز، حاول مرة أخرى'));
     } finally {
       setBooking(false);
     }

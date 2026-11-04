@@ -90,7 +90,7 @@ export interface ChatConversationSummary {
   updatedAt: string;
 }
 
-export interface APIResponse<T = any> {
+export interface APIResponse<T = unknown> {
   message?: string;
   data?: T;
 }

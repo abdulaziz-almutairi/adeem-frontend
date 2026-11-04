@@ -11,6 +11,7 @@ import EditProfileModal from '../../components/profile/EditProfileModal';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
 import Badge, { type BadgeVariant } from '../../components/ui/Badge';
+import { apiErrorMessage } from '../../utils/apiError';
 
 type StatusFilter = 'ALL' | Appointment['status'];
 
@@ -102,7 +103,19 @@ export default function DoctorDashboard() {
     }
   };
 
-  useEffect(() => { fetchAppointments(); fetchAvailability(); }, []);
+  // التحميل الأول: الحالة تتغير فقط داخل callbacks الطلبات (قيم التحميل تبدأ true)
+  useEffect(() => {
+    let active = true;
+    appointmentApi.getMyAppointmentsAsDoctor()
+      .then(res => { if (active) setAppointments(res.slice().sort((a, b) => a.appointmentDate.localeCompare(b.appointmentDate))); })
+      .catch(err => { console.error('فشل جلب المواعيد:', err); if (active) setAppointmentsError('تعذّر جلب المواعيد حالياً'); })
+      .finally(() => { if (active) setAppointmentsLoading(false); });
+    availabilityApi.getMyAvailability()
+      .then(res => { if (active) setAvailability(res); })
+      .catch(err => console.error('فشل جلب جدول الدوام:', err))
+      .finally(() => { if (active) setAvailabilityLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const handleCancel = async (id: number) => {
     if (!window.confirm('هل أنت متأكد من إلغاء هذا الموعد؟')) return;
@@ -124,8 +137,8 @@ export default function DoctorDashboard() {
     try {
       await availabilityApi.addAvailability({ dayOfWeek: newDay, startTime: newStart, endTime: newEnd });
       await fetchAvailability();
-    } catch (err: any) {
-      setAvailabilityError(err.response?.data?.message || 'تعذّر إضافة يوم الدوام');
+    } catch (err) {
+      setAvailabilityError(apiErrorMessage(err, 'تعذّر إضافة يوم الدوام'));
     } finally {
       setAddingAvailability(false);
     }

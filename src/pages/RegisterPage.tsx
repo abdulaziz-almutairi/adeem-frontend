@@ -64,18 +64,22 @@ export default function RegisterPage() {
 
       setTimeout(() => navigate('/login'), 3000);
 
-    } catch (err: any) {
-      console.error('[Register Error]', err);
+    } catch (caught) {
+      console.error('[Register Error]', caught);
       let errorMessage = 'حدث خطأ في التسجيل';
+      const err = caught as {
+        code?: string;
+        response?: { data?: { message?: string; errors?: { message?: string; defaultMessage?: string }[] } | string };
+      };
 
       if (err.code === 'ERR_NETWORK') {
         errorMessage = 'خطأ في الاتصال بالخادم ';
       } else if (err.response) {
         const data = err.response.data;
-        if (data?.message) {
+        if (typeof data === 'object' && data?.message) {
           errorMessage = data.message;
-        } else if (data?.errors && Array.isArray(data.errors)) {
-          errorMessage = data.errors.map((e: any) => e.message || e.defaultMessage).join('، ');
+        } else if (typeof data === 'object' && Array.isArray(data?.errors)) {
+          errorMessage = data.errors.map(e => e.message || e.defaultMessage).join('، ');
         } else if (typeof data === 'string') {
           errorMessage = data;
         }

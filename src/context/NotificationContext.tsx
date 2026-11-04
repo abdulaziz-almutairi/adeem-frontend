@@ -30,16 +30,29 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const clientsRef = useRef<Client[]>([]);
   const activeAppointmentIdRef = useRef<number | null>(null);
 
+  // نمط React الموصى به لضبط الحالة عند تغيّر قيمة: أثناء العرض بدل داخل effect
+  const pathMatch = location.pathname.match(/^\/chat\/(\d+)/);
+  const activeChatId = pathMatch ? Number(pathMatch[1]) : null;
+  const userId = user?.id ?? null;
+  const [seenChatId, setSeenChatId] = useState<number | null>(null);
+  const [seenUserId, setSeenUserId] = useState<number | null>(userId);
+  if (userId !== seenUserId) {
+    // مستخدم آخر: نبدأ عدّاد الرسائل من الصفر
+    setSeenUserId(userId);
+    setUnreadByAppointment({});
+  }
+  if (activeChatId !== seenChatId) {
+    // فتح محادثة يصفّر عدّاد رسائلها غير المقروءة
+    setSeenChatId(activeChatId);
+    if (activeChatId !== null) {
+      setUnreadByAppointment(prev => (prev[activeChatId] ? { ...prev, [activeChatId]: 0 } : prev));
+    }
+  }
+
   // تتبع أي محادثة مفتوحة حالياً عشان ما نزعج المستخدم برسالة هو أصلاً شايفها
   useEffect(() => {
-    const match = location.pathname.match(/^\/chat\/(\d+)/);
-    const activeId = match ? Number(match[1]) : null;
-    activeAppointmentIdRef.current = activeId;
-
-    if (activeId !== null) {
-      setUnreadByAppointment(prev => (prev[activeId] ? { ...prev, [activeId]: 0 } : prev));
-    }
-  }, [location.pathname]);
+    activeAppointmentIdRef.current = activeChatId;
+  }, [activeChatId]);
 
   // إذن الإشعارات على مستوى المتصفح (اختياري - لو رفض المستخدم نكتفي بالتنبيه داخل الصفحة)
   useEffect(() => {
@@ -53,7 +66,6 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     clientsRef.current.forEach(c => c.deactivate());
     clientsRef.current = [];
-    setUnreadByAppointment({});
 
     if (!user) return;
 
