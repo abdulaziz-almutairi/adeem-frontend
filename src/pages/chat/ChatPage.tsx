@@ -6,6 +6,7 @@ import { ChatbotMessage, ChatConversationSummary, ChatMessage } from '../../type
 import ChatSidebar from '../../components/chat/ChatSidebar';
 import Alert from '../../components/ui/Alert';
 import Button from '../../components/ui/Button';
+import { apiErrorMessage } from '../../utils/apiError';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB - نفس الحد الأقصى بالباك إند
@@ -142,25 +143,31 @@ export default function ChatPage() {
 
   // تحميل سجل المحادثات المحفوظ محلياً، مع ترحيل صيغة المحادثة الواحدة القديمة إن وُجدت
   useEffect(() => {
-    if (!user) {
-      setLoadingHistory(false);
-      return;
-    }
+    // التحميل يبدأ بعد انتهاء الـ effect (microtask) حتى لا تتغير الحالة بشكل متزامن داخله
+    let active = true;
+    Promise.resolve().then(() => {
+      if (!active) return;
+      if (!user) {
+        setLoadingHistory(false);
+        return;
+      }
 
-    const list = loadConversationList(user.id);
-    if (list.length > 0) {
-      setConversations(list);
-      loadConversation(user.id, list[0].id);
-      return;
-    }
+      const list = loadConversationList(user.id);
+      if (list.length > 0) {
+        setConversations(list);
+        loadConversation(user.id, list[0].id);
+        return;
+      }
 
-    const legacyId = localStorage.getItem(legacyStorageKey(user.id));
-    if (!legacyId) {
-      setLoadingHistory(false);
-      return;
-    }
+      const legacyId = localStorage.getItem(legacyStorageKey(user.id));
+      if (!legacyId) {
+        setLoadingHistory(false);
+        return;
+      }
 
-    loadLegacyConversation(user.id, Number(legacyId));
+      loadLegacyConversation(user.id, Number(legacyId));
+    });
+    return () => { active = false; };
   }, [user]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,8 +280,8 @@ export default function ChatPage() {
         saveConversationList(user.id, next);
         return next;
       });
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'تعذّر التواصل مع المساعد الذكي، حاول مرة أخرى');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'تعذّر التواصل مع المساعد الذكي، حاول مرة أخرى'));
     } finally {
       setSending(false);
     }

@@ -19,8 +19,8 @@ vi.mock('../../context/AuthContext', () => ({
 
 const { default: ChatPage } = await import('./ChatPage');
 
-const LIST_KEY = 'adeem_ai_chat_list_7';
-const LEGACY_KEY = 'adeem_ai_conversation_id_7';
+const LIST_STORAGE_NAME = 'adeem_ai_chat_list_7';
+const LEGACY_STORAGE_NAME = 'adeem_ai_conversation_id_7';
 const RETRY_TEXT = 'إعادة المحاولة';
 
 const storedList = [
@@ -38,7 +38,7 @@ function httpError(status: number) {
 }
 
 function storedIds() {
-  return (JSON.parse(localStorage.getItem(LIST_KEY) || '[]') as { id: number }[]).map(c => c.id);
+  return (JSON.parse(localStorage.getItem(LIST_STORAGE_NAME) || '[]') as { id: number }[]).map(c => c.id);
 }
 
 function renderPage() {
@@ -53,7 +53,7 @@ describe('ChatPage conversation pointers (FE-04)', () => {
   beforeEach(() => {
     getHistory.mockReset();
     localStorage.clear();
-    localStorage.setItem(LIST_KEY, JSON.stringify(storedList));
+    localStorage.setItem(LIST_STORAGE_NAME, JSON.stringify(storedList));
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
   });
 
@@ -138,8 +138,8 @@ describe('ChatPage conversation pointers (FE-04)', () => {
 
   describe('legacy single-conversation pointer', () => {
     beforeEach(() => {
-      localStorage.removeItem(LIST_KEY);
-      localStorage.setItem(LEGACY_KEY, '11');
+      localStorage.removeItem(LIST_STORAGE_NAME);
+      localStorage.setItem(LEGACY_STORAGE_NAME, '11');
     });
 
     it('keeps the legacy pointer on a network error and migrates it on retry', async () => {
@@ -149,7 +149,7 @@ describe('ChatPage conversation pointers (FE-04)', () => {
       fireEvent.click(await screen.findByText(RETRY_TEXT));
 
       expect(await screen.findByText('رد المساعد')).toBeTruthy();
-      expect(localStorage.getItem(LEGACY_KEY)).toBeNull();
+      expect(localStorage.getItem(LEGACY_STORAGE_NAME)).toBeNull();
       expect(storedIds()).toEqual([11]);
     });
 
@@ -159,7 +159,7 @@ describe('ChatPage conversation pointers (FE-04)', () => {
       renderPage();
 
       await screen.findByText(RETRY_TEXT);
-      expect(localStorage.getItem(LEGACY_KEY)).toBe('11');
+      expect(localStorage.getItem(LEGACY_STORAGE_NAME)).toBe('11');
     });
 
     it('removes the legacy pointer on 400', async () => {
@@ -167,7 +167,7 @@ describe('ChatPage conversation pointers (FE-04)', () => {
 
       renderPage();
 
-      await waitFor(() => expect(localStorage.getItem(LEGACY_KEY)).toBeNull());
+      await waitFor(() => expect(localStorage.getItem(LEGACY_STORAGE_NAME)).toBeNull());
       expect(screen.queryByText(RETRY_TEXT)).toBeNull();
     });
   });

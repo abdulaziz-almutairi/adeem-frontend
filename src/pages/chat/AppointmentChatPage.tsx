@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Appointment, Message } from '../../types';
 import type { Client } from '@stomp/stompjs';
 import Alert from '../../components/ui/Alert';
+import { apiErrorMessage } from '../../utils/apiError';
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
@@ -96,8 +97,8 @@ export default function AppointmentChatPage() {
     try {
       await messageApi.sendMessage({ appointmentId: Number(appointmentId), content });
       setInput('');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'تعذّر إرسال الرسالة');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'تعذّر إرسال الرسالة'));
     } finally {
       setSending(false);
     }

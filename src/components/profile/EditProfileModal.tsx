@@ -4,6 +4,7 @@ import { authApi } from '../../api/authApi';
 import { useAuth } from '../../context/AuthContext';
 import Button from '../ui/Button';
 import Alert from '../ui/Alert';
+import { apiErrorMessage } from '../../utils/apiError';
 
 const PHONE_PATTERN = /^05[0-9]{8}$/;
 
@@ -41,8 +42,8 @@ export default function EditProfileModal({ onClose, onSaved }: EditProfileModalP
       onSaved?.({ fullName: trimmedName, phoneNumber: phoneNumber || undefined });
       setSuccess(true);
       setTimeout(onClose, 900);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'تعذّر حفظ التعديلات، حاول مرة أخرى');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'تعذّر حفظ التعديلات، حاول مرة أخرى'));
     } finally {
       setSaving(false);
     }

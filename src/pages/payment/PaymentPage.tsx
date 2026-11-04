@@ -1,14 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CreditCard, Loader2, CheckCircle2 } from 'lucide-react';
 import { paymentApi } from '../../api/paymentApi';
 import { Payment } from '../../types';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
+import { apiErrorMessage } from '../../utils/apiError';
+
+// رقم الموعد يجب أن يكون عدداً صحيحاً موجباً - الرابط /payment/abc لا يرسل أي طلب (QA-010)
+function parseAppointmentId(value?: string) {
+  if (!value || !/^\d+$/.test(value)) return null;
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+}
 
 export default function PaymentPage() {
-  const { appointmentId } = useParams();
+  const { appointmentId: appointmentIdParam } = useParams();
   const navigate = useNavigate();
+  const appointmentId = parseAppointmentId(appointmentIdParam);
+  const pendingInitiate = useRef<{ appointmentId: number; request: Promise<Payment> } | null>(null);
 
   const [payment, setPayment] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,11 +27,27 @@ export default function PaymentPage() {
   const [confirmed, setConfirmed] = useState(false);
 
   useEffect(() => {
-    if (!appointmentId) return;
-    paymentApi.initiatePayment(Number(appointmentId))
-      .then(setPayment)
-      .catch((err) => setError(err.response?.data?.message || 'تعذّر بدء عملية الدفع'))
-      .finally(() => setLoading(false));
+    if (appointmentId === null) return;
+    let active = true;
+    // StrictMode يشغّل هذا التأثير مرتين في بيئة التطوير، فنعيد استخدام الطلب الجاري بدل إرسال POST ثانٍ (FE-08)
+    if (pendingInitiate.current?.appointmentId !== appointmentId) {
+      pendingInitiate.current = { appointmentId, request: paymentApi.initiatePayment(appointmentId) };
+    }
+    pendingInitiate.current.request
+      .then((result) => {
+        if (!active) return;
+        setPayment(result);
+        setError('');
+      })
+      .catch((err) => {
+        if (active) setError(err.response?.data?.message || 'تعذّر بدء عملية الدفع');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, [appointmentId]);
 
   const handleConfirm = async () => {
@@ -32,12 +58,25 @@ export default function PaymentPage() {
       await paymentApi.confirmPayment(payment.transactionReference);
       setConfirmed(true);
       setTimeout(() => navigate('/patient/dashboard'), 2000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'تعذّر تأكيد الدفع، حاول مرة أخرى');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'تعذّر تأكيد الدفع، حاول مرة أخرى'));
     } finally {
       setConfirming(false);
     }
   };
+
+  if (appointmentId === null) {
+    return (
+      <div className="min-h-screen pt-24 pb-12 px-6 adeem-bg flex items-start justify-center">
+        <div className="relative z-10 bg-white rounded-2xl p-8 shadow-xl border border-slate-100 max-w-md w-full text-center">
+          <Alert variant="danger" className="mb-4">رابط الدفع غير صالح. افتح صفحة الدفع من مواعيدك في لوحة التحكم</Alert>
+          <Button onClick={() => navigate('/patient/dashboard')} size="lg" className="w-full">
+            العودة إلى لوحة التحكم
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

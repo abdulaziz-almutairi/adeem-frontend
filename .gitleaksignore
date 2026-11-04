@@ -1,1 +1,5 @@
-# gitleaks baseline (INT-11). The frontend history has no known findings. Never add an entry without owner approval.
+# gitleaks baseline (INT-11). Never add an entry without owner approval.
+#
+# False positive, approved by the owner on 2026-11-04 (PR #4 secret-scan failure):
+# a browser-storage key name in a test ('adeem_ai_conversation_id_7'), not a credential.
+6f21adbff832e812a83354ff63fc29ed3f3f5c4c:src/pages/chat/ChatPage.test.tsx:generic-api-key:23
