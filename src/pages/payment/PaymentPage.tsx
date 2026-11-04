@@ -5,6 +5,7 @@ import { paymentApi } from '../../api/paymentApi';
 import { Payment } from '../../types';
 import Button from '../../components/ui/Button';
 import Alert from '../../components/ui/Alert';
+import { apiErrorMessage } from '../../utils/apiError';
 
 // رقم الموعد يجب أن يكون عدداً صحيحاً موجباً - الرابط /payment/abc لا يرسل أي طلب (QA-010)
 function parseAppointmentId(value?: string) {
@@ -57,8 +58,8 @@ export default function PaymentPage() {
       await paymentApi.confirmPayment(payment.transactionReference);
       setConfirmed(true);
       setTimeout(() => navigate('/patient/dashboard'), 2000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'تعذّر تأكيد الدفع، حاول مرة أخرى');
+    } catch (err) {
+      setError(apiErrorMessage(err, 'تعذّر تأكيد الدفع، حاول مرة أخرى'));
     } finally {
       setConfirming(false);
     }

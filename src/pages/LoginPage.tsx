@@ -5,6 +5,7 @@ import { LogIn } from 'lucide-react';
 import { dashboardPathForRole } from '../utils/roles';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
+import { apiErrorMessage } from '../utils/apiError';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,8 +24,8 @@ export default function LoginPage() {
       await login(email, password);
       const savedUser = JSON.parse(localStorage.getItem('adeem_user') || '{}');
       navigate(dashboardPathForRole(savedUser.role));
-    } catch (err: any) {
-      const message = err.response?.data?.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+    } catch (err) {
+      const message = apiErrorMessage(err, 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
       setError(message);
     } finally {
       setLoading(false);

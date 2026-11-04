@@ -52,35 +52,19 @@ export default function AdminDashboard() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL');
 
-  const fetchPendingDoctors = async () => {
-    setDoctorsLoading(true);
-    try {
-      const res = await adminApi.getPendingDoctors();
-      setDoctorsError('');
-      setPendingDoctors(res);
-    } catch (err) {
-      console.error('فشل جلب طلبات التوثيق:', err);
-      setDoctorsError('تعذّر جلب طلبات التوثيق حالياً');
-    } finally {
-      setDoctorsLoading(false);
-    }
-  };
-
-  const fetchUsers = async () => {
-    setUsersLoading(true);
-    try {
-      const res = await adminApi.getAllUsers();
-      setUsersError('');
-      setUsers(res);
-    } catch (err) {
-      console.error('فشل جلب المستخدمين:', err);
-      setUsersError('تعذّر جلب المستخدمين حالياً');
-    } finally {
-      setUsersLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchPendingDoctors(); fetchUsers(); }, []);
+  // التحميل الأول: الحالة تتغير فقط داخل callbacks الطلبات (قيم التحميل تبدأ true)
+  useEffect(() => {
+    let active = true;
+    adminApi.getPendingDoctors()
+      .then(res => { if (active) setPendingDoctors(res); })
+      .catch(err => { console.error('فشل جلب طلبات التوثيق:', err); if (active) setDoctorsError('تعذّر جلب طلبات التوثيق حالياً'); })
+      .finally(() => { if (active) setDoctorsLoading(false); });
+    adminApi.getAllUsers()
+      .then(res => { if (active) setUsers(res); })
+      .catch(err => { console.error('فشل جلب المستخدمين:', err); if (active) setUsersError('تعذّر جلب المستخدمين حالياً'); })
+      .finally(() => { if (active) setUsersLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const handleVerification = async (doctorProfileId: number, status: 'VERIFIED' | 'REJECTED') => {
     if (status === 'REJECTED' && !window.confirm('هل أنت متأكد من رفض طلب توثيق هذا الطبيب؟')) return;

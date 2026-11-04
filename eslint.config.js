@@ -18,5 +18,9 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // كل context يصدّر الـ hook الخاص به بجانب الـ Provider
+      'react-refresh/only-export-components': ['error', { allowExportNames: ['useAuth', 'useNotifications'] }],
+    },
   },
 ])
