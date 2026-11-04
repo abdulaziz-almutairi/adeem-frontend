@@ -40,17 +40,33 @@ export default function AppointmentChatPage() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [liveUnavailable, setLiveUnavailable] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const clientRef = useRef<Client | null>(null);
 
   useEffect(() => {
     if (!appointmentId || !user) return;
     const id = Number(appointmentId);
+    let cancelled = false;
 
+    // الاتصال اللحظي يُفتح فقط بعد نجاح جلب المحادثة، أي بعد التأكد أن المستخدم طرف في الموعد (FE-01)
     messageApi.getConversation(id)
-      .then(setMessages)
-      .catch((err) => setError(err.response?.data?.message || 'تعذّر جلب المحادثة'))
-      .finally(() => setLoading(false));
+      .then((history) => {
+        if (cancelled) return;
+        setMessages(history);
+        clientRef.current = messageApi.connectAppointmentChat(
+          id,
+          (incoming) => setMessages(prev => (prev.some(m => m.id === incoming.id) ? prev : [...prev, incoming])),
+          setConnected,
+          () => setLiveUnavailable(true),
+        );
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err.response?.data?.message || 'تعذّر جلب المحادثة');
+        setLiveUnavailable(true);
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
 
     const appointmentsPromise = user.role === 'DOCTOR'
       ? appointmentApi.getMyAppointmentsAsDoctor()
@@ -59,14 +75,11 @@ export default function AppointmentChatPage() {
       .then((list) => setAppointment(list.find(a => a.id === id) || null))
       .catch(() => {});
 
-    const client = messageApi.connectAppointmentChat(
-      id,
-      (incoming) => setMessages(prev => (prev.some(m => m.id === incoming.id) ? prev : [...prev, incoming])),
-      setConnected,
-    );
-    clientRef.current = client;
-
-    return () => { client.deactivate(); };
+    return () => {
+      cancelled = true;
+      void clientRef.current?.deactivate();
+      clientRef.current = null;
+    };
   }, [appointmentId, user]);
 
   useEffect(() => {
@@ -112,7 +125,7 @@ export default function AppointmentChatPage() {
               <h3 className="font-bold truncate">{counterpartName}</h3>
               <span className="text-xs text-white/80 flex items-center gap-1.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-success-300' : 'bg-white/40'}`} />
-                {connected ? 'متصل الآن' : 'جاري الاتصال...'}
+                {connected ? 'متصل الآن' : liveUnavailable ? 'غير متصل' : 'جاري الاتصال...'}
               </span>
             </div>
           </div>
